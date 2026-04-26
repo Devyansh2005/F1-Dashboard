@@ -2981,7 +2981,37 @@
       } else {
         area3d.style.display = 'none'; iframe.style.display = 'block';
         if (f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
-        iframe.src = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
+        // Real circuit coordinates for OpenStreetMap satellite view
+        const coords = {
+          'albert_park':  [-37.8497, 144.9680, 15],
+          'shanghai':     [31.3389,  121.2198, 15],
+          'suzuka':       [34.8431,  136.5407, 15],
+          'bahrain':      [26.0325,  50.5106,  15],
+          'jeddah':       [21.6319,  39.1044,  15],
+          'miami':        [25.9581, -80.2389,  15],
+          'monaco':       [43.7338,  7.4215,   16],
+          'barcelona':    [41.5700,   2.2611,  15],
+          'montreal':     [45.5000, -73.5228,  15],
+          'red_bull_ring':[47.2197,  14.7647,  15],
+          'silverstone':  [52.0786,  -1.0169,  15],
+          'hungaroring':  [47.5789,  19.2486,  15],
+          'spa':          [50.4372,   5.9714,  15],
+          'zandvoort':    [52.3888,   4.5409,  15],
+          'monza':        [45.6156,   9.2811,  15],
+          'madrid':       [40.4372,  -3.5851,  15],
+          'baku':         [40.3725,  49.8533,  15],
+          'marina_bay':   [1.2914,  103.8639,  15],
+          'austin':       [30.1328, -97.6411,  15],
+          'rodriguez':    [19.4042, -99.0907,  15],
+          'interlagos':   [-23.7036, -46.6997, 15],
+          'vegas':        [36.1147, -115.1728, 15],
+          'lusail':       [25.4900,  51.4542,  15],
+          'yas_marina':   [24.4672,  54.6031,  15],
+        };
+        const c = coords[circuitId] || [0, 0, 3];
+        const [lat, lon, zoom] = c;
+        const bbox = (0.015 / Math.pow(2, zoom - 14));
+        iframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-bbox},${lat-bbox},${lon+bbox},${lat+bbox}&layer=cyclemap&marker=${lat},${lon}`;
       }
     }
 
