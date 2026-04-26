@@ -2124,50 +2124,52 @@
       top: 0;
       left: 0;
       background: transparent;
+      z-index: 2;
     }
 
-    /* Modal Video Background */
-    .modal-video-bg {
+    /* Immersive Circuit Image Background */
+    .modal-circuit-bg {
        position: absolute;
        top: 0;
        left: 0;
        width: 100%;
        height: 100%;
-       object-fit: cover;
-       filter: blur(20px) brightness(0.4) saturate(1.5);
+       background-image: url('https://images.unsplash.com/photo-1541443131876-bb5bf03c6ba7?auto=format&fit=crop&q=80&w=2670');
+       background-size: cover;
+       background-position: center;
+       filter: blur(25px) brightness(0.35) saturate(1.2);
        z-index: -1;
-       pointer-events: none;
     }
 
-    /* Holographic HUD UPGRADE */
-    .hologram-label {
+    /* Iconic Video Panel */
+    .iconic-video-wrap {
        position: absolute;
-       bottom: 30px;
-       left: 32px;
+       top: 24px;
+       right: 24px;
+       width: 320px;
+       height: 180px;
+       background: rgba(0,0,0,0.4);
+       border: 1px solid rgba(255,255,255,0.1);
+       backdrop-filter: blur(5px);
+       z-index: 10;
        display: flex;
        flex-direction: column;
-       gap: 12px;
-       pointer-events: none;
-       z-index: 10;
-       padding: 20px;
-       background: rgba(255, 255, 255, 0.03);
-       backdrop-filter: blur(10px);
-       border-left: 3px solid var(--racing-hot);
+       animation: fadeInRight 0.8s ease backwards 0.5s;
     }
-    .h-stat {
+    .video-label {
+       padding: 8px 12px;
        font-family: 'JetBrains Mono', monospace;
        font-size: 9px;
-       letter-spacing: 0.25em;
-       color: var(--racing-hot);
+       background: var(--racing-hot);
+       color: #000;
+       font-weight: 600;
        text-transform: uppercase;
-       opacity: 0.8;
+       letter-spacing: 0.15em;
     }
-    .h-val {
-       font-family: 'Inter', sans-serif;
-       font-size: 24px;
-       font-weight: 800;
-       color: #fff;
-       letter-spacing: -0.02em;
+    .iconic-video-wrap iframe {
+       width: 100%;
+       flex: 1;
+       border: none;
     }
 
     #modalMapIframe {
@@ -2179,7 +2181,11 @@
       position: absolute;
       top: 0;
       left: 0;
-      z-index: 2;
+      z-index: 3;
+    }
+    @keyframes fadeInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
     }
   </style>
 </head>
@@ -2850,16 +2856,19 @@
         </div>
       </div>
       <div class="modal-body">
-        <!-- International Broadcast Background -->
-        <video class="modal-video-bg" id="modalVideo" autoplay muted loop playsinline>
-           <source src="https://assets.mixkit.co/videos/preview/mixkit-formula-one-car-racing-on-a-track-4052-large.mp4" type="video/mp4">
-        </video>
+        <div class="modal-circuit-bg" id="modalBgImg"></div>
+        
+        <div class="iconic-video-wrap" id="videoPanel">
+           <div class="video-label">Iconic Moment // Archive</div>
+           <iframe id="modalIconicVideo" src="" allow="autoplay"></iframe>
+        </div>
+
         <div id="modal3dCanvas"></div>
         <div class="hologram-label" id="hologramStats">
            <div class="h-stat">Circuit Telemetry // Active</div>
            <div class="h-val" id="h-trackLength">5.412 KM</div>
-           <div class="h-stat">Turn Analysis</div>
-           <div class="h-val" id="h-trackTurns">19 CORNERS</div>
+           <div class="h-stat" id="h-sectorLabel">SECTOR 1</div>
+           <div class="h-val" id="h-trackTurns">TURN 1</div>
         </div>
         <iframe id="modalMapIframe" src="" loading="lazy"></iframe>
       </div>
@@ -2905,74 +2914,113 @@
        }
        
        f1Scene = new THREE.Scene();
-       f1Scene.fog = new THREE.FogExp2(0x000000, 0.02);
+       f1Scene.fog = new THREE.FogExp2(0x000000, 0.015);
 
-       f1Camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-       // Camera will be controlled in the animation loop
+       f1Camera = new THREE.PerspectiveCamera(38, container.clientWidth / container.clientHeight, 0.1, 2000);
 
        f1Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
        f1Renderer.setSize(container.clientWidth, container.clientHeight);
        f1Renderer.setPixelRatio(window.devicePixelRatio);
        container.appendChild(f1Renderer.domElement);
 
-       f1Scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-       const spot = new THREE.SpotLight(0x00ffff, 1);
-       spot.position.set(0, 50, 0);
-       f1Scene.add(spot);
-
+       f1Scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+       
        const pts = getF1TrackPath(circuitId);
        const curve = new THREE.CatmullRomCurve3(pts, true);
        f1CompPoints = curve;
        
-       // High-Glow Track (The Path)
-       const tubeGeo = new THREE.TubeGeometry(curve, 300, 0.5, 12, true);
+       // MULTI-COLOR SECTOR TRACK RENDERING
+       const segCount = 300;
+       const tubeGeo = new THREE.TubeGeometry(curve, segCount, 0.6, 12, true);
+       
+       // Build vertex colors for sectors
+       const count = tubeGeo.attributes.position.count;
+       const colors = new Float32Array(count * 3);
+       for(let i=0; i<count; i++) {
+          const ratio = i / count;
+          let r=1, g=1, b=1;
+          if(ratio < 0.33) { r=1; g=0.2; b=0.1; } // S1: Red
+          else if(ratio < 0.66) { r=1; g=0.9; b=0.1; } // S2: Yellow
+          else { r=0; g=1; b=1; } // S3: Cyan
+          colors[i*3] = r; colors[i*3+1] = g; colors[i*3+2] = b;
+       }
+       tubeGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+       
        const tubeMat = new THREE.MeshPhongMaterial({ 
-          color: 0xffffff, 
-          emissive: 0x00ffff, 
-          emissiveIntensity: 5,
+          vertexColors: true,
+          emissive: 0x333333,
           transparent: true,
-          opacity: 0.9 
+          opacity: 0.95
        });
        f1TrackMesh = new THREE.Mesh(tubeGeo, tubeMat);
        f1Scene.add(f1TrackMesh);
 
-       // Car / Camera Target
-       const orbGeo = new THREE.SphereGeometry(1, 32, 32);
+       // Car Orb with Flare
+       const orbGeo = new THREE.SphereGeometry(1.4, 32, 32);
        const orbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
        f1CarOrb = new THREE.Mesh(orbGeo, orbMat);
-       const flare = new THREE.PointLight(0xffffff, 5, 20);
-       f1CarOrb.add(flare);
+       f1CarOrb.add(new THREE.PointLight(0xffffff, 6, 30));
        f1Scene.add(f1CarOrb);
 
        document.getElementById('h-trackLength').textContent = (5.2 + (pts.length * 0.15)).toFixed(3) + ' KM';
-       document.getElementById('h-trackTurns').textContent = (pts.length + 5) + ' CORNERS';
     }
 
     function animateF1Hologram() {
        if(!f1Renderer || !f1Scene) return;
        f1RenderID = requestAnimationFrame(animateF1Hologram);
        
-       const time = Date.now() * 0.0003;
+       const time = Date.now() * 0.00025;
        const t = (time % 1);
        
-       // 1. Position Car
        const pos = f1CompPoints.getPointAt(t);
        f1CarOrb.position.copy(pos);
        
-       // 2. Position Camera (Follow Cam Like Video)
-       const behind = f1CompPoints.getPointAt((t - 0.02 + 1) % 1);
-       f1Camera.position.set(behind.x, behind.y + 15, behind.z);
+       // Zandvoort-Style Cinematic Chaser (Slightly further back for better scale)
+       const behind = f1CompPoints.getPointAt((t - 0.08 + 1) % 1);
+       f1Camera.position.set(behind.x, behind.y + 35, behind.z);
        f1Camera.lookAt(pos);
 
-       // 3. Dynamic Track Drawing (Visual Highlight)
-       f1TrackMesh.rotation.y = Math.sin(time * 0.5) * 0.02;
-
-       // 4. Corner Announcement Logic
-       const currentCorner = Math.floor(t * 19) + 1;
+       // Dynamic Sector / Turn Intelligence
+       const sector = t < 0.33 ? 1 : t < 0.66 ? 2 : 3;
+       const sCol = sector === 1 ? '#ff3311' : sector === 2 ? '#ffdd11' : '#00ffff';
+       
+       const secEl = document.getElementById('h-sectorLabel');
+       if(secEl) {
+          secEl.textContent = `SECTOR ${sector}`;
+          secEl.style.color = sCol;
+       }
+       
        const turnEl = document.getElementById('h-trackTurns');
-       if(turnEl) turnEl.textContent = `TURN ${currentCorner} // ACTIVE`;
+       if(turnEl) turnEl.textContent = `TURN ${Math.floor(t * 19) + 1} // ACTIVE`;
        
        f1Renderer.render(f1Scene, f1Camera);
+    }
+
+    function setModalView(view, circuitId) {
+       const btn3d = document.getElementById('btn3d');
+       const btnSat = document.getElementById('btnSat');
+       if(btn3d) btn3d.classList.toggle('active', view === '3d');
+       if(btnSat) btnSat.classList.toggle('active', view === 'sat');
+       
+       document.getElementById('modal3dCanvas').style.display = view === '3d' ? 'block' : 'none';
+       document.getElementById('hologramStats').style.display = view === '3d' ? 'flex' : 'none';
+       document.getElementById('videoPanel').style.display = view === '3d' ? 'flex' : 'none';
+       document.getElementById('modalBgImg').style.display = view === '3d' ? 'block' : 'none';
+       document.getElementById('modalMapIframe').style.display = view === 'sat' ? 'block' : 'none';
+       
+       if(view === '3d') {
+          // Map iconic video IDs
+          const vMap = {
+             'monaco': 'P_pI_H_L1_U', 'monza': 'V_25v_e05qI', 'spa': 'J0_0N5yG3Y4', 
+             'silverstone': 'B0KNRuE68T8', 'suzuka': 'Z6X0l0L4_C4'
+          };
+          document.getElementById('modalIconicVideo').src = `https://www.youtube.com/embed/${vMap[circuitId] || 'vMap_FkM_Yc'}?autoplay=1&mute=1&loop=1&playlist=${vMap[circuitId] || 'vMap_FkM_Yc'}`;
+          
+          initF1Hologram(circuitId || 'generic');
+          if(!f1RenderID) animateF1Hologram();
+       } else {
+          if(f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
+       }
     }
 
     function setModalView(view, circuitId) {
