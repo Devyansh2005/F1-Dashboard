@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Devyansh's Pit Wall · Your Personal F1 2026 Dashboard</title>
 
+  <!-- WebGL Three.js Engine for Holographic Tracks -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <!-- Structured data — WebApplication + Person -->
   <script type="application/ld+json">
 {
@@ -2086,6 +2089,52 @@
     .modal-wiki-btn:hover {
       color: #fff;
     }
+
+    .modal-view-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-toggle {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.5);
+      padding: 6px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-toggle.active {
+      background: var(--racing-hot);
+      color: #000;
+      border-color: var(--racing-hot);
+      font-weight: 600;
+    }
+
+    #modal3dCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #modalMapIframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: saturate(1.2) contrast(1.1);
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
   </style>
 </head>
 
@@ -2748,9 +2797,14 @@
           <div class="modal-circuit" id="modalCircuitName">Circuit Name</div>
           <div class="modal-loc" id="modalLocation">City, Country</div>
         </div>
-        <button class="modal-close" onclick="document.getElementById('circuitModal').classList.remove('active')" aria-label="Close circuit details">X</button>
+        <div class="modal-view-controls">
+           <button class="btn-toggle active" onclick="setModalView('3d')" id="btn3d">3D Broadcast</button>
+           <button class="btn-toggle" onclick="setModalView('sat')" id="btnSat">Satellite</button>
+           <button class="modal-close" onclick="document.getElementById('circuitModal').classList.remove('active')" aria-label="Close circuit details">X</button>
+        </div>
       </div>
       <div class="modal-body">
+        <div id="modal3dCanvas"></div>
         <iframe id="modalMapIframe" src="" loading="lazy"></iframe>
       </div>
       <div class="modal-footer">
@@ -2760,6 +2814,131 @@
   </div>
 
   <script>
+    let f1Scene, f1Camera, f1Renderer, f1CarOrb, f1RenderID;
+
+    function initF1Hologram() {
+       const container = document.getElementById('modal3dCanvas');
+       if(f1Scene || !container) return;
+       
+       f1Scene = new THREE.Scene();
+       f1Scene.fog = new THREE.FogExp2(0x000000, 0.04);
+
+       f1Camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+       f1Camera.position.set(0, 15, 20);
+       f1Camera.lookAt(0, 0, 0);
+
+       f1Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+       f1Renderer.setSize(container.clientWidth, container.clientHeight);
+       f1Renderer.setPixelRatio(window.devicePixelRatio);
+       container.appendChild(f1Renderer.domElement);
+
+       f1Scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+       const pointLight = new THREE.PointLight(0xff2200, 2, 50);
+       pointLight.position.set(0, 10, 0);
+       f1Scene.add(pointLight);
+
+       const grid = new THREE.GridHelper(40, 40, 0x222222, 0x111111);
+       grid.position.y = -2;
+       f1Scene.add(grid);
+
+       const pts = [
+         new THREE.Vector3(0, 0, 10), new THREE.Vector3(5, 0, 9), new THREE.Vector3(8, 0, 7), 
+         new THREE.Vector3(9, 0, 3), new THREE.Vector3(12, 0, 1), new THREE.Vector3(14, 0, -3), 
+         new THREE.Vector3(11, 0, -8), new THREE.Vector3(7, 0, -10), new THREE.Vector3(2, 0, -11), 
+         new THREE.Vector3(-3, 0, -9), new THREE.Vector3(-8, 0, -6), new THREE.Vector3(-10, 0, -2), 
+         new THREE.Vector3(-7, 0, 2), new THREE.Vector3(-5, 0, 6)
+       ];
+       const curve = new THREE.CatmullRomCurve3(pts, true);
+       
+       const tubeGeo = new THREE.TubeGeometry(curve, 100, 0.3, 8, true);
+       const tubeMat = new THREE.MeshBasicMaterial({ color: 0xff3300, wireframe: true, transparent: true, opacity: 0.8 });
+       const trackMesh = new THREE.Mesh(tubeGeo, tubeMat);
+       f1Scene.add(trackMesh);
+
+       const orbGeo = new THREE.SphereGeometry(0.6, 16, 16);
+       const orbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+       f1CarOrb = new THREE.Mesh(orbGeo, orbMat);
+       f1Scene.add(f1CarOrb);
+
+       // Mouse Interactivity
+       let isDragging = false;
+       let previousMouseX = 0;
+       container.onmousedown = (e) => { isDragging = true; previousMouseX = e.clientX; };
+       window.onmouseup = () => { isDragging = false; };
+       window.onmousemove = (e) => {
+         if(!isDragging || !f1Scene) return;
+         const deltaX = e.clientX - previousMouseX;
+         f1Scene.rotation.y += deltaX * 0.01;
+         previousMouseX = e.clientX;
+       };
+
+       // Add Broadcast Labels (Corners & Speed Traps)
+       const addLabel = (txt, pos) => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 256; canvas.height = 64;
+          ctx.fillStyle = 'rgba(255,51,0,0.8)';
+          ctx.fillRect(0, 0, 180, 40);
+          ctx.font = 'bold 24px JetBrains Mono';
+          ctx.fillStyle = '#fff';
+          ctx.fillText(txt, 10, 28);
+          const tex = new THREE.CanvasTexture(canvas);
+          const mat = new THREE.SpriteMaterial({ map: tex });
+          const sprite = new THREE.Sprite(mat);
+          sprite.position.copy(pos);
+          sprite.position.y += 2;
+          sprite.scale.set(4, 1, 1);
+          f1Scene.add(sprite);
+       };
+
+       addLabel('T1 · CORNER', pts[1]);
+       addLabel('SEC 1', pts[4]);
+       addLabel('SPEED TRAP', pts[7]);
+       addLabel('T12 · CORNER', pts[11]);
+       addLabel('SEC 2', pts[13]);
+
+       window.addEventListener('resize', () => {
+         if(!f1Camera || !container.clientWidth) return;
+         f1Camera.aspect = container.clientWidth / container.clientHeight;
+         f1Camera.updateProjectionMatrix();
+         f1Renderer.setSize(container.clientWidth, container.clientHeight);
+       });
+    }
+
+    function animateF1Hologram() {
+       if(!f1Scene) return;
+       f1RenderID = requestAnimationFrame(animateF1Hologram);
+       
+       const time = Date.now() * 0.001;
+       const loopTime = 12;
+       const t = (time % loopTime) / loopTime;
+       
+       const trackCurve = f1Scene.children.find(c => c.geometry && c.geometry.type === 'TubeGeometry')?.geometry?.parameters?.path;
+       if(trackCurve) {
+          f1CarOrb.position.copy(trackCurve.getPointAt(t));
+       }
+       
+       f1Scene.rotation.y += 0.002;
+       f1Renderer.render(f1Scene, f1Camera);
+    }
+
+    function setModalView(view) {
+       const btn3d = document.getElementById('btn3d');
+       const btnSat = document.getElementById('btnSat');
+       if(btn3d) btn3d.classList.toggle('active', view === '3d');
+       if(btnSat) btnSat.classList.toggle('active', view === 'sat');
+       
+       document.getElementById('modal3dCanvas').style.display = view === '3d' ? 'block' : 'none';
+       document.getElementById('modalMapIframe').style.display = view === 'sat' ? 'block' : 'none';
+       
+       if(view === '3d') {
+          initF1Hologram();
+          if(!f1RenderID) animateF1Hologram();
+       } else {
+          if(f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
+       }
+    }
+
     (function () {
       const now = new Date();
       const h = now.getHours();
@@ -2924,6 +3103,7 @@
                 document.getElementById('modalWikiLink').href = c.url;
                 document.getElementById('modalMapIframe').src = `https://maps.google.com/maps?q=${c.Location.lat},${c.Location.long}&t=k&z=15&output=embed`;
                 document.getElementById('circuitModal').classList.add('active');
+                setModalView('3d');
              };
 
              const raceTime = race.time ? race.time : '15:00:00Z';
