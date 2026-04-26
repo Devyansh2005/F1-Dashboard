@@ -821,15 +821,18 @@
       border-right: 1px solid var(--rule-light);
       position: relative;
       background: var(--paper);
-      transition: background 0.25s, transform 0.25s;
+      transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
       min-height: 148px;
       display: flex;
       flex-direction: column;
-      cursor: default;
+      cursor: pointer;
     }
 
     .cal-round:hover {
       background: var(--paper-3);
+      transform: scale(1.02);
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .cal-round:last-child {
@@ -1950,6 +1953,139 @@
     .golive-pre::-webkit-scrollbar-thumb {
       background: rgba(242, 236, 224, 0.18);
     }
+
+    /* Circuit Modal Overlay */
+    .circuit-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .circuit-modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .circuit-modal {
+      background: var(--carbon);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      width: 92%;
+      max-width: 800px;
+      height: 75vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(20px) scale(0.98);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    }
+
+    .circuit-modal-overlay.active .circuit-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-head {
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: var(--paper);
+    }
+
+    .modal-title-area {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-race {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--racing-hot);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal-circuit {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+
+    .modal-loc {
+      font-size: 13px;
+      color: var(--ink-2);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: background 0.2s, border 0.2s;
+    }
+    .modal-close:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: #fff;
+    }
+
+    .modal-body {
+      flex: 1;
+      position: relative;
+      background: #111;
+    }
+
+    .modal-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: saturate(1.2) contrast(1.1);
+    }
+
+    .modal-footer {
+      padding: 16px 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      background: var(--paper);
+    }
+
+    .modal-wiki-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: var(--ink-2);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .modal-wiki-btn:hover {
+      color: #fff;
+    }
   </style>
 </head>
 
@@ -2603,6 +2739,26 @@
     </footer>
   </div>
 
+  <!-- Interactive Modal Overlay -->
+  <div class="circuit-modal-overlay" id="circuitModal" onclick="this.classList.remove('active')">
+    <div class="circuit-modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-area">
+          <div class="modal-race" id="modalRaceName">Grand Prix</div>
+          <div class="modal-circuit" id="modalCircuitName">Circuit Name</div>
+          <div class="modal-loc" id="modalLocation">City, Country</div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('circuitModal').classList.remove('active')" aria-label="Close circuit details">X</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="modalMapIframe" src="" loading="lazy"></iframe>
+      </div>
+      <div class="modal-footer">
+        <a href="#" target="_blank" rel="noopener noreferrer" class="modal-wiki-btn" id="modalWikiLink">View Full Circuit Details ↗</a>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const now = new Date();
@@ -2758,6 +2914,18 @@
           document.querySelectorAll('.cal-round').forEach((node, idx) => {
              const race = races[idx];
              if(!race) return;
+             
+             // Setup Modal click handler
+             node.onclick = () => {
+                const c = race.Circuit;
+                document.getElementById('modalRaceName').textContent = race.raceName;
+                document.getElementById('modalCircuitName').textContent = c.circuitName;
+                document.getElementById('modalLocation').textContent = `${c.Location.locality}, ${c.Location.country}`;
+                document.getElementById('modalWikiLink').href = c.url;
+                document.getElementById('modalMapIframe').src = `https://maps.google.com/maps?q=${c.Location.lat},${c.Location.long}&t=k&z=15&output=embed`;
+                document.getElementById('circuitModal').classList.add('active');
+             };
+
              const raceTime = race.time ? race.time : '15:00:00Z';
              const targetTime = new Date(race.date + 'T' + raceTime);
              
