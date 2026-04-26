@@ -2569,125 +2569,7 @@
     </div>
   </section>
 
-  <section class="golive-section">
-    <div class="golive-card">
-      <div class="golive-stripe" aria-hidden="true"></div>
-      <div class="golive-left">
-        <div class="golive-eyebrow">§ 04 · Go Live</div>
-        <h2 class="golive-title">Make it <em>auto-update</em>.</h2>
-        <p class="golive-lede">
-          Right now this dashboard is a snapshot — you update the numbers after each race. When you're ready, there are
-          three paths to real-time data pulled straight from the F1 API after every checkered flag.
-        </p>
-      </div>
-      <div class="golive-right">
 
-        <div class="golive-step">
-          <div class="golive-step-num">01</div>
-          <div>
-            <div class="golive-step-head">Manual <em>· 2 min after each race</em></div>
-            <div class="golive-step-body">
-              Open <code>index.html</code> in any text editor. Find a driver's name (e.g. <code>Antonelli</code>),
-              update the number a few lines below it (e.g. <code>72</code> &rarr; <code>97</code>). Save. Redeploy. Good
-              for fans who only watch the majors.
-            </div>
-          </div>
-        </div>
-
-        <div class="golive-step">
-          <div class="golive-step-num">02</div>
-          <div>
-            <div class="golive-step-head">Semi-auto <em>· 30 sec via AI</em></div>
-            <div class="golive-step-body">
-              Paste the file into Claude or ChatGPT with this prompt &mdash; it does the rest.
-            </div>
-            <details class="golive-details">
-              <summary>show the prompt</summary>
-              <pre class="golive-pre">Update my F1 dashboard after the [RACE NAME] GP.
-
-New driver standings (top 10):
-1. Antonelli &mdash; 97
-2. Russell &mdash; 84
-3. Leclerc &mdash; 68
-&hellip;
-
-New constructor totals:
-Mercedes 181, Ferrari 124, McLaren &hellip;
-
-New podium for "Last Race":
-P1 [Driver] &mdash; [Team] &mdash; [Time]
-P2 &hellip; (gap)
-P3 &hellip; (gap)
-
-Update the countdown to the next race.
-Return the COMPLETE HTML in one code block. Preserve every
-&lt;!-- DO NOT MODIFY --&gt; block exactly as-is.</pre>
-            </details>
-          </div>
-        </div>
-
-        <div class="golive-step">
-          <div class="golive-step-num">03</div>
-          <div>
-            <div class="golive-step-head">Full auto <em>· public API, no manual edits</em></div>
-            <div class="golive-step-body">
-              Hook the dashboard to a public F1 data API. Standings update on their own once a race is over &mdash; no
-              touching the file again for the rest of the season.
-            </div>
-            <details class="golive-details">
-              <summary>show the setup</summary>
-              <p class="golive-detail-p"><strong>Easiest path &middot; Jolpica F1 (Ergast successor,
-                  CORS-enabled).</strong> Add this script tag near the bottom of the file, just before the closing
-                <code>&lt;/body&gt;</code>. It fetches once on load and overwrites the hardcoded driver points in place:
-              </p>
-              <pre class="golive-pre">&lt;script&gt;
-(async function () {
-  try {
-    const r = await fetch('https://api.jolpi.ca/ergast/f1/current/driverStandings.json');
-    const j = await r.json();
-    const list = j.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || [];
-    document.querySelectorAll('.driver-row').forEach((row, i) =&gt; {
-      const d = list[i];
-      if (!d) return;
-      const pts = row.querySelector('.driver-pts');
-      if (pts) pts.textContent = d.points;
-    });
-  } catch (e) { /* network blip &mdash; keep the static template */ }
-})();
-&lt;/script&gt;</pre>
-              <p class="golive-detail-p"><strong>More powerful &middot; OpenF1 + a tiny proxy.</strong> OpenF1 has live
-                timing data (laps, pit stops, positions during a session) but doesn't expose CORS. A 30-line Cloudflare
-                Worker fixes that and adds a 10-minute cache. The Worker quickstart link below has everything; the
-                transformation logic mirrors the snippet above.</p>
-              <p class="golive-detail-p"><strong>Python path &middot; FastF1 + GitHub Actions.</strong> Prefer Python?
-                Use the FastF1 library to write a JSON snapshot, commit it via a GitHub Action on a daily cron, and have
-                the dashboard fetch the JSON. Same idea, different stack.</p>
-            </details>
-          </div>
-        </div>
-
-        <div class="golive-cta-row">
-          <a class="golive-cta golive-cta-ghost" href="https://api.jolpi.ca/ergast/" target="_blank"
-            rel="noopener noreferrer">
-            Jolpica F1 API
-          </a>
-          <a class="golive-cta golive-cta-ghost" href="https://openf1.org/" target="_blank" rel="noopener noreferrer">
-            OpenF1 docs
-          </a>
-          <a class="golive-cta golive-cta-ghost" href="https://docs.fastf1.dev/" target="_blank"
-            rel="noopener noreferrer">
-            FastF1 (Python)
-          </a>
-          <a class="golive-cta golive-cta-ghost"
-            href="https://developers.cloudflare.com/workers/get-started/quickstarts/" target="_blank"
-            rel="noopener noreferrer">
-            Cloudflare Workers
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </section>
 
   <section class="stats-ribbon">
     <div class="stats-grid">
@@ -2732,48 +2614,185 @@ Return the COMPLETE HTML in one code block. Preserve every
       document.getElementById('dateline').textContent = D[now.getDay()] + ' · ' + String(now.getDate()).padStart(2, '0') + ' ' + M[now.getMonth()] + ' · ' + now.getFullYear();
     })();
 
+    // Auto-Scroll calendar to .next
     (function () {
-      const target = new Date('2026-05-03T20:00:00Z').getTime();
+      setTimeout(() => {
+        const next = document.querySelector('.cal-round.next');
+        const strip = document.getElementById('calStrip');
+        if (next && strip) {
+          strip.scrollTo({ left: next.offsetLeft - 60, behavior: 'smooth' });
+        }
+      }, 3000);
+    })();
+
+    // Ticker Loop and Next Race Timer state initialization
+    let STATIC_TICKER = [
+      { sym: 'FAV DRIVER', val: 'HAMILTON', pts: 'P4 · 41 pts' },
+      { sym: 'FAV TEAM', val: 'FERRARI', pts: 'P2 WCC' },
+      { sym: 'FL', val: 'RUSSELL', pts: '1:28.411' },
+      { sym: 'FAST PIT', val: 'MCLAREN', pts: '1.94s' },
+      { sym: 'HAM GAP', val: '−31 PTS', pts: 'TO LEAD' },
+    ];
+    let F1_TARGET_DATE = new Date('2026-05-03T20:00:00Z').getTime();
+
+    function renderTicker(additions) {
+      const items = additions ? [...additions, ...STATIC_TICKER] : STATIC_TICKER;
+      const mk = (it) => `<span class="tick"><span class="sym">${it.sym}</span> <span class="val">${it.val}</span> <span class="pts">${it.pts}</span></span><span class="tick tick-dot">◆</span>`;
+      const half = items.map(mk).join('');
+      document.getElementById('tkTrack').innerHTML = half + half;
+    }
+    renderTicker();
+
+    (function () {
       const pad = (n) => String(n).padStart(2, '0');
       function tick() {
-        const diff = target - Date.now();
+        if (window.F1_NEXT_RACE_TARGET) F1_TARGET_DATE = window.F1_NEXT_RACE_TARGET;
+        const diff = F1_TARGET_DATE - Date.now();
         if (diff <= 0) {
-          ['cd-d', 'cd-h', 'cd-m', 'cd-s'].forEach(id => document.getElementById(id).textContent = '00');
+          ['cd-d', 'cd-h', 'cd-m', 'cd-s'].forEach(id => {
+             const el = document.getElementById(id); if (el) el.textContent = '00';
+          });
           return;
         }
-        document.getElementById('cd-d').textContent = pad(Math.floor(diff / 86400000));
-        document.getElementById('cd-h').textContent = pad(Math.floor((diff % 86400000) / 3600000));
-        document.getElementById('cd-m').textContent = pad(Math.floor((diff % 3600000) / 60000));
-        document.getElementById('cd-s').textContent = pad(Math.floor((diff % 60000) / 1000));
+        const d = document.getElementById('cd-d'); if (d) d.textContent = pad(Math.floor(diff / 86400000));
+        const h = document.getElementById('cd-h'); if (h) h.textContent = pad(Math.floor((diff % 86400000) / 3600000));
+        const m = document.getElementById('cd-m'); if (m) m.textContent = pad(Math.floor((diff % 3600000) / 60000));
+        const s = document.getElementById('cd-s'); if (s) s.textContent = pad(Math.floor((diff % 60000) / 1000));
       }
       tick();
       setInterval(tick, 1000);
     })();
 
-    (function () {
-      const items = [
-        { sym: 'WDC', val: 'ANTONELLI', pts: '72 pts' },
-        { sym: 'WCC', val: 'MERCEDES', pts: '135 pts' },
-        { sym: 'NEXT', val: 'MIAMI GP', pts: 'MAY 3' },
-        { sym: 'FAV DRIVER', val: 'HAMILTON', pts: 'P4 · 41 pts' },
-        { sym: 'FAV TEAM', val: 'FERRARI', pts: 'P2 WCC' },
-        { sym: 'FL', val: 'RUSSELL', pts: '1:28.411' },
-        { sym: 'FAST PIT', val: 'MCLAREN', pts: '1.94s' },
-        { sym: 'HAM GAP', val: '−31 PTS', pts: 'TO LEAD' },
-      ];
-      const mk = (it) => `<span class="tick"><span class="sym">${it.sym}</span> <span class="val">${it.val}</span> <span class="pts">${it.pts}</span></span><span class="tick tick-dot">◆</span>`;
-      const half = items.map(mk).join('');
-      document.getElementById('tkTrack').innerHTML = half + half;
-    })();
+    // Live API Fetching
+    (async function () {
+      try {
+        const fetchJSON = async (url) => { const r = await fetch(url); return r.json(); };
+        
+        const getTeamColor = (id) => {
+          const map = {
+            'mercedes': 'var(--mercedes)', 'ferrari': 'var(--ferrari)', 'mclaren': 'var(--mclaren)',
+            'red_bull': 'var(--redbull)', 'williams': 'var(--williams)', 'haas': 'var(--haas)',
+            'alpine': 'var(--alpine)', 'aston_martin': 'var(--aston)', 'rb': 'var(--racingbulls)',
+            'sauber': '#00e701', 'audi': 'var(--audi)', 'cadillac': 'var(--cadillac)'
+          };
+          return map[id] || 'var(--ink-3)';
+        };
 
-    (function () {
-      setTimeout(() => {
-        const next = document.querySelector('.cal-round.next');
-        if (next) {
-          const strip = document.getElementById('calStrip');
-          strip.scrollTo({ left: next.offsetLeft - 60, behavior: 'smooth' });
+        const [drvRes, conRes, resultsRes, calRes, newsRes] = await Promise.all([
+          fetchJSON('https://api.jolpi.ca/ergast/f1/current/driverStandings.json').catch(() => null),
+          fetchJSON('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json').catch(() => null),
+          fetchJSON('https://api.jolpi.ca/ergast/f1/current/last/results.json').catch(() => null),
+          fetchJSON('https://api.jolpi.ca/ergast/f1/current.json').catch(() => null),
+          fetchJSON('https://api.rss2json.com/v1/api.json?rss_url=https://www.motorsport.com/rss/f1/news/').catch(() => null)
+        ]);
+
+        let dynamicTicker = [];
+
+        if (drvRes) {
+          const drvList = drvRes.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || [];
+          if (drvList.length > 0) {
+            dynamicTicker.push({ sym: 'WDC', val: drvList[0].Driver.familyName.toUpperCase(), pts: drvList[0].points + ' pts' });
+          }
+          document.querySelectorAll('.driver-row').forEach((row, i) => {
+            const d = drvList[i];
+            if (!d) { row.style.display = 'none'; return; }
+            
+            const teamId = d.Constructors[0]?.constructorId;
+            const color = getTeamColor(teamId);
+            row.style.setProperty('--team-color', color);
+            
+            const posEl = row.querySelector('.driver-pos'); posEl && (posEl.textContent = String(d.position).padStart(2, '0'));
+            const nameEl = row.querySelector('.driver-name'); nameEl && (nameEl.textContent = d.Driver.givenName.charAt(0) + '. ' + d.Driver.familyName);
+            const codeEl = row.querySelector('.driver-code'); 
+            if(codeEl) {
+               codeEl.textContent = d.Driver.code || d.Driver.familyName.substring(0,3).toUpperCase();
+               codeEl.style.background = color;
+               codeEl.style.color = ['sauber', 'mercedes', 'williams'].includes(teamId) ? '#000' : '#fff';
+            }
+            const teamEl = row.querySelector('.driver-team'); teamEl && (teamEl.innerHTML = `${d.Constructors[0]?.name || ''} · ${d.Driver.nationality}`);
+            const ptsEl = row.querySelector('.driver-pts'); ptsEl && (ptsEl.textContent = d.points);
+          });
         }
-      }, 5000);
+
+        if (conRes) {
+          const conList = conRes.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || [];
+          if (conList.length > 0) {
+            dynamicTicker.push({ sym: 'WCC', val: conList[0].Constructor.name.toUpperCase(), pts: conList[0].points + ' pts' });
+          }
+          const maxPts = parseInt(conList[0]?.points || 1);
+          document.querySelectorAll('.con-row').forEach((row, i) => {
+            const c = conList[i];
+            if (!c) { row.style.display = 'none'; return; }
+            const teamId = c.Constructor.constructorId;
+            row.style.setProperty('--team-color', getTeamColor(teamId));
+            
+            const posEl = row.querySelector('.con-pos'); posEl && (posEl.textContent = String(c.position).padStart(2, '0'));
+            const nameEl = row.querySelector('.con-name'); nameEl && (nameEl.textContent = c.Constructor.name);
+            const engEl = row.querySelector('.con-engine'); engEl && (engEl.textContent = c.Constructor.nationality);
+            const ptsEl = row.querySelector('.con-pts'); ptsEl && (ptsEl.textContent = c.points);
+            const barEl = row.querySelector('.con-bar-fill'); barEl && (barEl.style.width = Math.max(2, (c.points / maxPts) * 100) + '%');
+          });
+        }
+
+        if (resultsRes) {
+          const results = resultsRes.MRData.RaceTable.Races[0];
+          if (results) {
+            const head = document.querySelector('.podium-head');
+            if(head) head.textContent = `${results.raceName} · ${results.Circuit.circuitName} · Result`;
+            const podRows = document.querySelectorAll('.pod-row');
+            for(let i=0; i<3; i++) {
+               const r = results.Results[i];
+               if(!r || !podRows[i]) continue;
+               const nameEl = podRows[i].querySelector('.pod-driver-name'); nameEl && (nameEl.textContent = `${r.Driver.givenName} ${r.Driver.familyName}`);
+               const teamEl = podRows[i].querySelector('.pod-driver-team'); teamEl && (teamEl.textContent = `${r.Constructor.name} · #${r.Driver.permanentNumber}`);
+               const timeEl = podRows[i].querySelector('.pod-time'); timeEl && (timeEl.textContent = r.Time ? r.Time.time : r.status);
+            }
+          }
+        }
+
+        if (calRes) {
+          const races = calRes.MRData.RaceTable.Races;
+          const now = new Date();
+          let nextFound = false;
+          
+          document.querySelectorAll('.cal-round').forEach((node, idx) => {
+             const race = races[idx];
+             if(!race) return;
+             const raceTime = race.time ? race.time : '15:00:00Z';
+             const targetTime = new Date(race.date + 'T' + raceTime);
+             
+             node.classList.remove('next', 'done');
+             if (targetTime > now && !nextFound) {
+                node.classList.add('next');
+                nextFound = true;
+                window.F1_NEXT_RACE_TARGET = targetTime.getTime();
+                dynamicTicker.push({ sym: 'NEXT', val: race.raceName.toUpperCase(), pts: targetTime.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})});
+             } else if (targetTime <= now) {
+                node.classList.add('done');
+             }
+          });
+        }
+
+        if (newsRes && newsRes.items) {
+           const items = newsRes.items.slice(0, 4);
+           const newsBlocks = document.querySelectorAll('.news-item');
+           items.forEach((item, i) => {
+             if(!newsBlocks[i]) return;
+             const hlEl = newsBlocks[i].querySelector('.news-headline'); hlEl && (hlEl.textContent = item.title);
+             let desc = item.description.replace(/<[^>]*>?/gm, '').trim();
+             if(desc.length === 0) desc = 'Click to read more details about this latest update...';
+             const bodyEl = newsBlocks[i].querySelector('.news-body'); bodyEl && (bodyEl.textContent = desc.substring(0, 150) + '...');
+             const kickEl = newsBlocks[i].querySelector('.news-kicker'); kickEl && (kickEl.textContent = 'Live Feed');
+             newsBlocks[i].style.cursor = 'pointer';
+             newsBlocks[i].onclick = () => window.open(item.link, '_blank');
+           });
+        }
+
+        renderTicker(dynamicTicker);
+
+      } catch (e) {
+        console.error("Live update failed", e);
+      }
     })();
   </script>
 </body>
