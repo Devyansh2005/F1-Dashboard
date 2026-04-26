@@ -2086,7 +2086,7 @@
       transition: color 0.2s;
     }
 
-    /* ULTIMATE BROADCAST LAYOUT - FIXED */
+    /* ULTIMATE FULL-WIDTH 3D BROADCAST */
     .modal-body {
        position: relative;
        flex: 1;
@@ -2097,46 +2097,13 @@
     }
 
     .analytics-panel {
-       flex: 2;
+       flex: 1;
        position: relative;
-       border-right: 1px solid rgba(255,255,255,0.1);
-       background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
        z-index: 10;
     }
 
-    .archive-panel {
-       flex: 1.5;
-       background: #050505;
-       display: flex;
-       flex-direction: column;
-       padding: 24px;
-       gap: 20px;
-       z-index: 20;
-       border-left: 2px solid var(--racing-hot);
-    }
-
-    .archive-header {
-       font-family: 'JetBrains Mono', monospace;
-       font-size: 11px;
-       color: var(--racing-hot);
-       letter-spacing: 0.3em;
-       text-transform: uppercase;
-       font-weight: 900;
-       padding-bottom: 8px;
-    }
-
-    .video-container {
-       width: 100%;
-       aspect-ratio: 16/9;
-       background: #111;
-       border: 1px solid rgba(255,255,255,0.1);
-       position: relative;
-    }
-    #modalIconicVideo {
-       width: 100%;
-       height: 100%;
-       border: none;
-    }
+    /* Archive Panel Removed for Performance/Reliability */
+    .archive-panel { display: none !important; }
 
     .modal-circuit-bg {
        position: absolute;
@@ -2144,14 +2111,23 @@
        left: 0;
        width: 100%;
        height: 100%;
-       background: #000;
-       background-image: 
-          radial-gradient(circle at 2px 2px, rgba(255,54,54,0.05) 1px, transparent 0);
-       background-size: 32px 32px;
+       background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
        z-index: 1;
     }
 
-    .circuit-hero-img { display: none; }
+    .circuit-hero-img {
+       position: absolute;
+       top: 0;
+       left: 0;
+       width: 100%;
+       height: 100%;
+       background-size: cover;
+       background-position: center;
+       opacity: 0.3;
+       filter: blur(20px) contrast(1.2);
+       z-index: 2;
+       display: block !important;
+    }
 
     #modal3dCanvas {
       width: 100%;
@@ -2159,17 +2135,20 @@
       display: block;
     }
 
-    /* TELEMETRY HUD */
+    /* PREMIUM HUD HUD */
     .hologram-label {
        position: absolute;
-       bottom: 32px;
-       left: 32px;
+       top: 40px;
+       right: 40px;
        z-index: 50;
        pointer-events: none;
-       background: rgba(0,0,0,0.85);
+       background: rgba(0,0,0,0.8);
        padding: 24px;
-       border-left: 4px solid var(--racing-hot);
-       box-shadow: 0 0 30px rgba(0,0,0,1);
+       border-right: 4px solid var(--racing-hot);
+       text-align: right;
+       backdrop-filter: blur(20px);
+       border-radius: 2px;
+       box-shadow: 0 20px 80px rgba(0,0,0,0.8);
     }
 
     #modalMapIframe {
@@ -2861,22 +2840,10 @@
          <div class="analytics-panel" id="analyticsArea">
              <div id="modal3dCanvas"></div>
              <div class="hologram-label" id="hologramStats">
-                <div class="h-stat" style="color: var(--racing-hot); font-weight: 800; margin-bottom: 4px;">BROADCAST TELEMETRY</div>
-                <div class="h-val" id="h-trackLength" style="font-size: 28px;">5.412 KM</div>
-                <div class="h-stat" id="h-sectorLabel" style="margin-top: 12px; font-size: 12px; font-weight: 800;">SECTOR 1</div>
-                <div class="h-val" id="h-trackTurns" style="font-size: 18px; color: rgba(255,255,255,0.8);">TURN 1</div>
-             </div>
-         </div>
-
-         <div class="archive-panel" id="archiveArea">
-             <div class="archive-header">Iconic Archive // 2026 Season</div>
-             <div class="video-container">
-                 <iframe id="modalIconicVideo" src="" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-             </div>
-             <a id="videoFallback" href="#" target="_blank" style="font-size: 10px; color: var(--racing-hot); text-decoration: underline; margin-top: -10px;">Link to Archive Reel (Manual Access)</a>
-             <div class="h-stat" style="margin-top: 8px;">System Status</div>
-             <div style="font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.6;">
-                Real-time 3D circuit ingestion active. Historical archival access granted. Current track rendering: Professional Grade HQ.
+                <div class="h-stat" style="color: var(--racing-hot); font-weight: 800; margin-bottom: 4px; font-size: 14px;">LIVE BROADCAST FEED // 2026</div>
+                <div class="h-val" id="h-trackLength" style="font-size: 42px; font-weight: 900;">5.412 KM</div>
+                <div class="h-stat" id="h-sectorLabel" style="margin-top: 16px; font-size: 14px; font-weight: 900;">SECTOR 1 // ACTIVE</div>
+                <div class="h-val" id="h-trackTurns" style="font-size: 24px; color: rgba(255,255,255,0.7); font-weight: 300;">TURN 1 · APEX OPTIMIZED</div>
              </div>
          </div>
 
@@ -3004,28 +2971,28 @@
        if(b3d) b3d.classList.toggle('active', view === '3d');
        if(bSat) bSat.classList.toggle('active', view === 'sat');
        const area3d = document.getElementById('analyticsArea');
-       const areaArchive = document.getElementById('archiveArea');
        const iframe = document.getElementById('modalMapIframe');
+       const hero = document.getElementById('circuitHero');
+
        if(view === '3d') {
-          area3d.style.display = 'block'; areaArchive.style.display = 'flex'; iframe.style.display = 'none';
-          const vMap = {
-             'monaco': '87_C_2r2OXY', 'monza': '9qY_P6o2u9E', 'spa': 'J0_0N5yG3Y4', 
-             'silverstone': 'B0KNRuE68T8', 'suzuka': 'Z6X0l0L4_C4', 'bahrain': 'vMap_FkM_Yc',
-             'jeddah': 'ZaqYQ1B_hro', 'albert_park': '96hGqXQ6A3I', 'shanghai': 'RkS3S069s1M',
-             'miami': 'L-C5X9T-FWA', 'rodriguez': 'WbN6e-tB-y4', 'interlagos': 'L0P_0gB19r8',
-             'vegas': 'Z6G0g_D1r8U', 'yas_marina': 'YqP0g_D1r8U'
-          };
-          const videoId = vMap[circuitId] || 'Cpt4S3p6E0I';
-          const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&rel=0`;
-          document.getElementById('modalIconicVideo').src = embedUrl;
-          document.getElementById('videoFallback').href = `https://www.youtube.com/watch?v=${videoId}`;
+          area3d.style.display = 'block'; iframe.style.display = 'none';
+          
+          if(hero) {
+             const cMap = {
+                'monaco': '1541443131876-bb5bf03c6ba7', 'monza': '1534433767-463690d7945d',
+                'spa': '1504933350106-4443997f80db', 'silverstone': '1568265000493-2c13dccf8004',
+                'suzuka': '1520626330-246eb049962a', 'vegas': '1541123432733-dc997ef0544c'
+             };
+             const slug = cMap[circuitId] || '1541443131876-bb5bf03c6ba7';
+             hero.style.backgroundImage = `url('https://images.unsplash.com/photo-${slug}?auto=format&fit=crop&q=80&w=2670')`;
+          }
+
           initF1Hologram(circuitId || 'generic');
           if(!f1RenderID) animateF1Hologram();
        } else {
-          area3d.style.display = 'none'; areaArchive.style.display = 'none'; iframe.style.display = 'block';
+          area3d.style.display = 'none'; iframe.style.display = 'block';
           if(f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
-          const mapUrl = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
-          iframe.src = mapUrl;
+          iframe.src = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
        }
     }
 
