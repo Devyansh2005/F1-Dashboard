@@ -835,7 +835,7 @@
       background: var(--paper-3);
       transform: scale(1.02);
       z-index: 10;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .cal-round:last-child {
@@ -1991,7 +1991,7 @@
       flex-direction: column;
       transform: translateY(20px) scale(0.98);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
     }
 
     .circuit-modal-overlay.active .circuit-modal {
@@ -2039,7 +2039,7 @@
 
     .modal-close {
       background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       width: 36px;
       height: 36px;
@@ -2050,8 +2050,9 @@
       font-family: 'JetBrains Mono', monospace;
       transition: background 0.2s, border 0.2s;
     }
+
     .modal-close:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border-color: #fff;
     }
 
@@ -2086,47 +2087,74 @@
       transition: color 0.2s;
     }
 
-    /* ULTIMATE FULL-WIDTH 3D BROADCAST */
+    /* ULTIMATE BROADCAST LAYOUT - FIXED */
     .modal-body {
-       position: relative;
-       flex: 1;
-       min-height: 550px;
-       display: flex;
-       background: #000;
-       overflow: hidden;
+      position: relative;
+      flex: 1;
+      min-height: 550px;
+      display: flex;
+      background: #000;
+      overflow: hidden;
     }
 
     .analytics-panel {
-       flex: 1;
-       position: relative;
-       z-index: 10;
+      flex: 2;
+      position: relative;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+      z-index: 10;
     }
 
-    /* Archive Panel Removed for Performance/Reliability */
-    .archive-panel { display: none !important; }
+    .archive-panel {
+      flex: 1.5;
+      background: #050505;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      gap: 20px;
+      z-index: 20;
+      border-left: 2px solid var(--racing-hot);
+    }
+
+    .archive-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--racing-hot);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 900;
+      padding-bottom: 8px;
+    }
+
+    .video-container {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #111;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    #modalIconicVideo {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
     .modal-circuit-bg {
-       position: absolute;
-       top: 0;
-       left: 0;
-       width: 100%;
-       height: 100%;
-       background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
-       z-index: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      background-image:
+        radial-gradient(circle at 2px 2px, rgba(255, 54, 54, 0.05) 1px, transparent 0);
+      background-size: 32px 32px;
+      z-index: 1;
     }
 
     .circuit-hero-img {
-       position: absolute;
-       top: 0;
-       left: 0;
-       width: 100%;
-       height: 100%;
-       background-size: cover;
-       background-position: center;
-       opacity: 0.3;
-       filter: blur(20px) contrast(1.2);
-       z-index: 2;
-       display: block !important;
+      display: none;
     }
 
     #modal3dCanvas {
@@ -2135,20 +2163,17 @@
       display: block;
     }
 
-    /* PREMIUM HUD HUD */
+    /* TELEMETRY HUD */
     .hologram-label {
-       position: absolute;
-       top: 40px;
-       right: 40px;
-       z-index: 50;
-       pointer-events: none;
-       background: rgba(0,0,0,0.8);
-       padding: 24px;
-       border-right: 4px solid var(--racing-hot);
-       text-align: right;
-       backdrop-filter: blur(20px);
-       border-radius: 2px;
-       box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+      position: absolute;
+      bottom: 32px;
+      left: 32px;
+      z-index: 50;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 24px;
+      border-left: 4px solid var(--racing-hot);
+      box-shadow: 0 0 30px rgba(0, 0, 0, 1);
     }
 
     #modalMapIframe {
@@ -2161,9 +2186,17 @@
       left: 0;
       z-index: 500;
     }
+
     @keyframes fadeInRight {
-      from { opacity: 0; transform: translateX(20px); }
-      to { opacity: 1; transform: translateX(0); }
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
   </style>
 </head>
@@ -2828,29 +2861,49 @@
           <div class="modal-loc" id="modalLocation">City, Country</div>
         </div>
         <div class="modal-view-controls">
-           <button class="btn-toggle active" onclick="setModalView('3d')" id="btn3d">3D Broadcast</button>
-           <button class="btn-toggle" onclick="setModalView('sat')" id="btnSat">Satellite</button>
-           <button class="modal-close" onclick="document.getElementById('circuitModal').classList.remove('active')" aria-label="Close circuit details">X</button>
+          <button class="btn-toggle active" onclick="setModalView('3d')" id="btn3d">3D Broadcast</button>
+          <button class="btn-toggle" onclick="setModalView('sat')" id="btnSat">Satellite</button>
+          <button class="modal-close" onclick="document.getElementById('circuitModal').classList.remove('active')"
+            aria-label="Close circuit details">X</button>
         </div>
       </div>
       <div class="modal-body">
-         <div class="modal-circuit-bg"></div>
-         <div class="circuit-hero-img" id="circuitHero"></div>
-         
-         <div class="analytics-panel" id="analyticsArea">
-             <div id="modal3dCanvas"></div>
-             <div class="hologram-label" id="hologramStats">
-                <div class="h-stat" style="color: var(--racing-hot); font-weight: 800; margin-bottom: 4px; font-size: 14px;">LIVE BROADCAST FEED // 2026</div>
-                <div class="h-val" id="h-trackLength" style="font-size: 42px; font-weight: 900;">5.412 KM</div>
-                <div class="h-stat" id="h-sectorLabel" style="margin-top: 16px; font-size: 14px; font-weight: 900;">SECTOR 1 // ACTIVE</div>
-                <div class="h-val" id="h-trackTurns" style="font-size: 24px; color: rgba(255,255,255,0.7); font-weight: 300;">TURN 1 · APEX OPTIMIZED</div>
-             </div>
-         </div>
+        <div class="modal-circuit-bg"></div>
+        <div class="circuit-hero-img" id="circuitHero"></div>
 
-         <iframe id="modalMapIframe" src="" loading="lazy"></iframe>
+        <div class="analytics-panel" id="analyticsArea">
+          <div id="modal3dCanvas"></div>
+          <div class="hologram-label" id="hologramStats">
+            <div class="h-stat" style="color: var(--racing-hot); font-weight: 800; margin-bottom: 4px;">BROADCAST
+              TELEMETRY</div>
+            <div class="h-val" id="h-trackLength" style="font-size: 28px;">5.412 KM</div>
+            <div class="h-stat" id="h-sectorLabel" style="margin-top: 12px; font-size: 12px; font-weight: 800;">SECTOR 1
+            </div>
+            <div class="h-val" id="h-trackTurns" style="font-size: 18px; color: rgba(255,255,255,0.8);">TURN 1</div>
+          </div>
+        </div>
+
+        <div class="archive-panel" id="archiveArea">
+          <div class="archive-header">Iconic Archive // 2026 Season</div>
+          <div class="video-container">
+            <iframe id="modalIconicVideo" src="" allow="autoplay; encrypted-media; picture-in-picture"
+              allowfullscreen></iframe>
+          </div>
+          <a id="videoFallback" href="#" target="_blank"
+            style="font-size: 10px; color: var(--racing-hot); text-decoration: underline; margin-top: -10px;">Link to
+            Archive Reel (Manual Access)</a>
+          <div class="h-stat" style="margin-top: 8px;">System Status</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.6;">
+            Real-time 3D circuit ingestion active. Historical archival access granted. Current track rendering:
+            Professional Grade HQ.
+          </div>
+        </div>
+
+        <iframe id="modalMapIframe" src="" loading="lazy"></iframe>
       </div>
       <div class="modal-footer">
-        <a href="#" target="_blank" rel="noopener noreferrer" class="modal-wiki-btn" id="modalWikiLink">View Full Circuit Details ↗</a>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="modal-wiki-btn" id="modalWikiLink">View Full
+          Circuit Details ↗</a>
       </div>
     </div>
   </div>
@@ -2860,140 +2913,140 @@
 
     // PROFESSIONAL CIRCUIT GEOMETRY DATABASE
     const ACTUAL_CIRCUITS = {
-       'monaco': [[11,3],[22,1],[35,5],[39,12],[36,25],[24,30],[12,28],[-5,24],[-15,10],[-12,-5],[-5,-12],[3,-8]],
-       'monza': [[0,40],[30,35],[40,20],[40,-20],[20,-35],[-20,-30],[-40,0],[-30,30]],
-       'spa': [[0,50],[20,45],[45,20],[50,-10],[30,-40],[0,-50],[-30,-40],[-50,0],[-40,40]],
-       'silverstone': [[0,30],[20,28],[35,10],[30,-20],[10,-35],[-20,-25],[-35,0],[-25,25]],
-       'baku': [[0,40],[10,40],[10,-40],[-10,-40],[-10,0],[-20,0],[-20,40]],
-       'zandvoort': [[0,25],[15,20],[20,5],[15,-15],[0,-20],[-15,-15],[-20,5],[-15,20]],
-       'suzuka': [[0,30],[15,20],[20,0],[15,-20],[0,-30],[-15,-20],[-20,0],[-15,20],[0,0],[10,10],[0,20],[-10,10]],
-       'albert_park': [[0,30],[25,20],[30,-10],[10,-30],[-20,-20],[-30,5],[-15,25]],
-       'interlagos': [[0,20],[15,15],[20,0],[15,-15],[-5,-20],[-20,-5],[-15,15]],
-       'vegas': [[0,40],[40,40],[40,-40],[-40,-40],[-40,40]]
+      'monaco': [[11, 3], [22, 1], [35, 5], [39, 12], [36, 25], [24, 30], [12, 28], [-5, 24], [-15, 10], [-12, -5], [-5, -12], [3, -8]],
+      'monza': [[0, 40], [30, 35], [40, 20], [40, -20], [20, -35], [-20, -30], [-40, 0], [-30, 30]],
+      'spa': [[0, 50], [20, 45], [45, 20], [50, -10], [30, -40], [0, -50], [-30, -40], [-50, 0], [-40, 40]],
+      'silverstone': [[0, 30], [20, 28], [35, 10], [30, -20], [10, -35], [-20, -25], [-35, 0], [-25, 25]],
+      'baku': [[0, 40], [10, 40], [10, -40], [-10, -40], [-10, 0], [-20, 0], [-20, 40]],
+      'zandvoort': [[0, 25], [15, 20], [20, 5], [15, -15], [0, -20], [-15, -15], [-20, 5], [-15, 20]],
+      'suzuka': [[0, 30], [15, 20], [20, 0], [15, -20], [0, -30], [-15, -20], [-20, 0], [-15, 20], [0, 0], [10, 10], [0, 20], [-10, 10]],
+      'albert_park': [[0, 30], [25, 20], [30, -10], [10, -30], [-20, -20], [-30, 5], [-15, 25]],
+      'interlagos': [[0, 20], [15, 15], [20, 0], [15, -15], [-5, -20], [-20, -5], [-15, 15]],
+      'vegas': [[0, 40], [40, 40], [40, -40], [-40, -40], [-40, 40]]
     };
 
     function createF1Car() {
-       const car = new THREE.Group();
-       const chassis = new THREE.Mesh(new THREE.BoxGeometry(3, 0.8, 1.4), new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.8, roughness: 0.2 }));
-       car.add(chassis);
-       const nose = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.4, 0.8), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
-       nose.position.set(2, -0.2, 0);
-       car.add(nose);
-       const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
-       const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-       const w1 = new THREE.Mesh(wheelGeo, wheelMat); w1.rotation.x = Math.PI/2; w1.position.set(1.2, -0.2, 0.8); car.add(w1);
-       const w2 = w1.clone(); w2.position.z = -0.8; car.add(w2);
-       const w3 = w1.clone(); w3.position.set(-1.2, -0.2, 0.8); car.add(w3);
-       const w4 = w1.clone(); w4.position.set(-1.2, -0.2, -0.8); car.add(w4);
-       return car;
+      const car = new THREE.Group();
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(3, 0.8, 1.4), new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.8, roughness: 0.2 }));
+      car.add(chassis);
+      const nose = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.4, 0.8), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+      nose.position.set(2, -0.2, 0);
+      car.add(nose);
+      const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+      const w1 = new THREE.Mesh(wheelGeo, wheelMat); w1.rotation.x = Math.PI / 2; w1.position.set(1.2, -0.2, 0.8); car.add(w1);
+      const w2 = w1.clone(); w2.position.z = -0.8; car.add(w2);
+      const w3 = w1.clone(); w3.position.set(-1.2, -0.2, 0.8); car.add(w3);
+      const w4 = w1.clone(); w4.position.set(-1.2, -0.2, -0.8); car.add(w4);
+      return car;
     }
 
     function getF1TrackPath(id) {
-       const raw = ACTUAL_CIRCUITS[id];
-       if(raw) return raw.map(p => new THREE.Vector3(p[0], 0, p[1]));
-       let seed = 0; for(let i=0; i<id.length; i++) seed += id.charCodeAt(i);
-       const rng = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-       const pts = []; for(let i=0; i<15; i++) {
-          const a = (i/15) * Math.PI * 2; const r = 20 + rng() * 15;
-          pts.push(new THREE.Vector3(Math.cos(a)*r, 0, Math.sin(a)*r));
-       }
-       return pts;
+      const raw = ACTUAL_CIRCUITS[id];
+      if (raw) return raw.map(p => new THREE.Vector3(p[0], 0, p[1]));
+      let seed = 0; for (let i = 0; i < id.length; i++) seed += id.charCodeAt(i);
+      const rng = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      const pts = []; for (let i = 0; i < 15; i++) {
+        const a = (i / 15) * Math.PI * 2; const r = 20 + rng() * 15;
+        pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+      }
+      return pts;
     }
 
     function initF1Hologram(circuitId) {
-       const container = document.getElementById('modal3dCanvas');
-       if(!container) return;
-       if(f1Renderer) { container.removeChild(f1Renderer.domElement); f1Renderer.dispose(); }
-       f1Scene = new THREE.Scene();
-       f1Scene.fog = new THREE.Fog(0x000000, 10, 200);
-       f1Camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 5000);
-       f1Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-       f1Renderer.setSize(container.clientWidth, container.clientHeight);
-       f1Renderer.setPixelRatio(window.devicePixelRatio);
-       container.appendChild(f1Renderer.domElement);
-       f1Scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-       const pts = getF1TrackPath(circuitId);
-       const curve = new THREE.CatmullRomCurve3(pts, true);
-       f1CompPoints = curve;
-       const tubeGeo1 = new THREE.TubeGeometry(curve, 500, 0.8, 16, true);
-       const tubeGeo2 = new THREE.TubeGeometry(curve, 500, 1.2, 8, true);
-       const count = tubeGeo1.attributes.position.count;
-       const colors = new Float32Array(count * 3);
-       for(let i=0; i<count; i++) {
-          const ratio = (i / count);
-          if(ratio < 0.33) { colors[i*3]=0.8; colors[i*3+1]=0; colors[i*3+2]=1; }
-          else if(ratio < 0.66) { colors[i*3]=1; colors[i*3+1]=1; colors[i*3+2]=0; }
-          else { colors[i*3]=0; colors[i*3+1]=1; colors[i*3+2]=1; }
-       }
-       tubeGeo1.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-       f1TrackMesh = new THREE.Mesh(tubeGeo1, new THREE.MeshPhongMaterial({ vertexColors: true, emissive: 0x333333 }));
-       f1Scene.add(f1TrackMesh);
-       f1Scene.add(new THREE.Mesh(tubeGeo2, new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15 })));
-       const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: 0x020202, metalness: 1 }));
-       floor.rotation.x = -Math.PI / 2; floor.position.y = -20; f1Scene.add(floor);
-       const grid = new THREE.GridHelper(2000, 40, 0x00ffff, 0x001111);
-       grid.position.y = -19.9; f1Scene.add(grid);
-       const pCount = 80; const partGeo = new THREE.BufferGeometry();
-       const partPos = new Float32Array(pCount * 3);
-       partGeo.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
-       f1Particles = new THREE.Points(partGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, blending: THREE.AdditiveBlending }));
-       f1Scene.add(f1Particles);
-       f1CarModel = createF1Car(); f1CarModel.add(new THREE.PointLight(0xffffff, 20, 100)); f1Scene.add(f1CarModel);
-       document.getElementById('h-trackLength').textContent = (5.2 + (pts.length * 0.15)).toFixed(3) + ' KM';
+      const container = document.getElementById('modal3dCanvas');
+      if (!container) return;
+      if (f1Renderer) { container.removeChild(f1Renderer.domElement); f1Renderer.dispose(); }
+      f1Scene = new THREE.Scene();
+      f1Scene.fog = new THREE.Fog(0x000000, 10, 200);
+      f1Camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 5000);
+      f1Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      f1Renderer.setSize(container.clientWidth, container.clientHeight);
+      f1Renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(f1Renderer.domElement);
+      f1Scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const pts = getF1TrackPath(circuitId);
+      const curve = new THREE.CatmullRomCurve3(pts, true);
+      f1CompPoints = curve;
+      const tubeGeo1 = new THREE.TubeGeometry(curve, 500, 0.8, 16, true);
+      const tubeGeo2 = new THREE.TubeGeometry(curve, 500, 1.2, 8, true);
+      const count = tubeGeo1.attributes.position.count;
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const ratio = (i / count);
+        if (ratio < 0.33) { colors[i * 3] = 0.8; colors[i * 3 + 1] = 0; colors[i * 3 + 2] = 1; }
+        else if (ratio < 0.66) { colors[i * 3] = 1; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 0; }
+        else { colors[i * 3] = 0; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 1; }
+      }
+      tubeGeo1.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      f1TrackMesh = new THREE.Mesh(tubeGeo1, new THREE.MeshPhongMaterial({ vertexColors: true, emissive: 0x333333 }));
+      f1Scene.add(f1TrackMesh);
+      f1Scene.add(new THREE.Mesh(tubeGeo2, new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15 })));
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: 0x020202, metalness: 1 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.y = -20; f1Scene.add(floor);
+      const grid = new THREE.GridHelper(2000, 40, 0x00ffff, 0x001111);
+      grid.position.y = -19.9; f1Scene.add(grid);
+      const pCount = 80; const partGeo = new THREE.BufferGeometry();
+      const partPos = new Float32Array(pCount * 3);
+      partGeo.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+      f1Particles = new THREE.Points(partGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, blending: THREE.AdditiveBlending }));
+      f1Scene.add(f1Particles);
+      f1CarModel = createF1Car(); f1CarModel.add(new THREE.PointLight(0xffffff, 20, 100)); f1Scene.add(f1CarModel);
+      document.getElementById('h-trackLength').textContent = (5.2 + (pts.length * 0.15)).toFixed(3) + ' KM';
     }
 
     function animateF1Hologram() {
-       if(!f1Renderer || !f1Scene) return;
-       f1RenderID = requestAnimationFrame(animateF1Hologram);
-       const time = Date.now() * 0.0002; const t = (time % 1);
-       const pos = f1CompPoints.getPointAt(t);
-       const tangent = f1CompPoints.getTangentAt(t);
-       f1CarModel.position.copy(pos); f1CarModel.lookAt(pos.clone().add(tangent));
-       const pPos = f1Particles.geometry.attributes.position.array;
-       for(let i=79; i>0; i--) { pPos[i*3]=pPos[(i-1)*3]; pPos[i*3+1]=pPos[(i-1)*3+1]; pPos[i*3+2]=pPos[(i-1)*3+2]; }
-       pPos[0]=pos.x; pPos[1]=pos.y; pPos[2]=pos.z;
-       f1Particles.geometry.attributes.position.needsUpdate = true;
-       const offV = f1CompPoints.getPointAt((t - 0.12 + 1) % 1);
-       f1Camera.position.lerp(new THREE.Vector3(offV.x, offV.y+60, offV.z), 0.05);
-       f1Camera.lookAt(pos);
-       const sector = t < 0.33 ? 1 : t < 0.66 ? 2 : 3;
-       const secEl = document.getElementById('h-sectorLabel');
-       if(secEl) {
-           secEl.textContent = `SECTOR ${sector} // DATA FEED`;
-           secEl.style.color = sector === 1 ? '#ff00ff' : sector === 2 ? '#ffff00' : '#00ffff';
-       }
-       f1Renderer.render(f1Scene, f1Camera);
+      if (!f1Renderer || !f1Scene) return;
+      f1RenderID = requestAnimationFrame(animateF1Hologram);
+      const time = Date.now() * 0.0002; const t = (time % 1);
+      const pos = f1CompPoints.getPointAt(t);
+      const tangent = f1CompPoints.getTangentAt(t);
+      f1CarModel.position.copy(pos); f1CarModel.lookAt(pos.clone().add(tangent));
+      const pPos = f1Particles.geometry.attributes.position.array;
+      for (let i = 79; i > 0; i--) { pPos[i * 3] = pPos[(i - 1) * 3]; pPos[i * 3 + 1] = pPos[(i - 1) * 3 + 1]; pPos[i * 3 + 2] = pPos[(i - 1) * 3 + 2]; }
+      pPos[0] = pos.x; pPos[1] = pos.y; pPos[2] = pos.z;
+      f1Particles.geometry.attributes.position.needsUpdate = true;
+      const offV = f1CompPoints.getPointAt((t - 0.12 + 1) % 1);
+      f1Camera.position.lerp(new THREE.Vector3(offV.x, offV.y + 60, offV.z), 0.05);
+      f1Camera.lookAt(pos);
+      const sector = t < 0.33 ? 1 : t < 0.66 ? 2 : 3;
+      const secEl = document.getElementById('h-sectorLabel');
+      if (secEl) {
+        secEl.textContent = `SECTOR ${sector} // DATA FEED`;
+        secEl.style.color = sector === 1 ? '#ff00ff' : sector === 2 ? '#ffff00' : '#00ffff';
+      }
+      f1Renderer.render(f1Scene, f1Camera);
     }
 
     function setModalView(view, circuitId) {
-       const b3d = document.getElementById('btn3d');
-       const bSat = document.getElementById('btnSat');
-       if(b3d) b3d.classList.toggle('active', view === '3d');
-       if(bSat) bSat.classList.toggle('active', view === 'sat');
-       const area3d = document.getElementById('analyticsArea');
-       const iframe = document.getElementById('modalMapIframe');
-       const hero = document.getElementById('circuitHero');
-
-       if(view === '3d') {
-          area3d.style.display = 'block'; iframe.style.display = 'none';
-          
-          if(hero) {
-             const cMap = {
-                'monaco': '1541443131876-bb5bf03c6ba7', 'monza': '1534433767-463690d7945d',
-                'spa': '1504933350106-4443997f80db', 'silverstone': '1568265000493-2c13dccf8004',
-                'suzuka': '1520626330-246eb049962a', 'vegas': '1541123432733-dc997ef0544c'
-             };
-             const slug = cMap[circuitId] || '1541443131876-bb5bf03c6ba7';
-             hero.style.backgroundImage = `url('https://images.unsplash.com/photo-${slug}?auto=format&fit=crop&q=80&w=2670')`;
-          }
-
-          initF1Hologram(circuitId || 'generic');
-          if(!f1RenderID) animateF1Hologram();
-       } else {
-          area3d.style.display = 'none'; iframe.style.display = 'block';
-          if(f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
-          iframe.src = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
-       }
+      const b3d = document.getElementById('btn3d');
+      const bSat = document.getElementById('btnSat');
+      if (b3d) b3d.classList.toggle('active', view === '3d');
+      if (bSat) bSat.classList.toggle('active', view === 'sat');
+      const area3d = document.getElementById('analyticsArea');
+      const areaArchive = document.getElementById('archiveArea');
+      const iframe = document.getElementById('modalMapIframe');
+      if (view === '3d') {
+        area3d.style.display = 'block'; areaArchive.style.display = 'flex'; iframe.style.display = 'none';
+        const vMap = {
+          'monaco': '87_C_2r2OXY', 'monza': '9qY_P6o2u9E', 'spa': 'J0_0N5yG3Y4',
+          'silverstone': 'B0KNRuE68T8', 'suzuka': 'Z6X0l0L4_C4', 'bahrain': 'vMap_FkM_Yc',
+          'jeddah': 'ZaqYQ1B_hro', 'albert_park': '96hGqXQ6A3I', 'shanghai': 'RkS3S069s1M',
+          'miami': 'L-C5X9T-FWA', 'rodriguez': 'WbN6e-tB-y4', 'interlagos': 'L0P_0gB19r8',
+          'vegas': 'Z6G0g_D1r8U', 'yas_marina': 'YqP0g_D1r8U'
+        };
+        const videoId = vMap[circuitId] || 'Cpt4S3p6E0I';
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&rel=0`;
+        document.getElementById('modalIconicVideo').src = embedUrl;
+        document.getElementById('videoFallback').href = `https://www.youtube.com/watch?v=${videoId}`;
+        initF1Hologram(circuitId || 'generic');
+        if (!f1RenderID) animateF1Hologram();
+      } else {
+        area3d.style.display = 'none'; areaArchive.style.display = 'none'; iframe.style.display = 'block';
+        if (f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
+        const mapUrl = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
+        iframe.src = mapUrl;
+      }
     }
 
     (function () {
@@ -3042,7 +3095,7 @@
         const diff = F1_TARGET_DATE - Date.now();
         if (diff <= 0) {
           ['cd-d', 'cd-h', 'cd-m', 'cd-s'].forEach(id => {
-             const el = document.getElementById(id); if (el) el.textContent = '00';
+            const el = document.getElementById(id); if (el) el.textContent = '00';
           });
           return;
         }
@@ -3059,7 +3112,7 @@
     (async function () {
       try {
         const fetchJSON = async (url) => { const r = await fetch(url); return r.json(); };
-        
+
         const getTeamColor = (id) => {
           const map = {
             'mercedes': 'var(--mercedes)', 'ferrari': 'var(--ferrari)', 'mclaren': 'var(--mclaren)',
@@ -3088,18 +3141,18 @@
           document.querySelectorAll('.driver-row').forEach((row, i) => {
             const d = drvList[i];
             if (!d) { row.style.display = 'none'; return; }
-            
+
             const teamId = d.Constructors[0]?.constructorId;
             const color = getTeamColor(teamId);
             row.style.setProperty('--team-color', color);
-            
+
             const posEl = row.querySelector('.driver-pos'); posEl && (posEl.textContent = String(d.position).padStart(2, '0'));
             const nameEl = row.querySelector('.driver-name'); nameEl && (nameEl.textContent = d.Driver.givenName.charAt(0) + '. ' + d.Driver.familyName);
-            const codeEl = row.querySelector('.driver-code'); 
-            if(codeEl) {
-               codeEl.textContent = d.Driver.code || d.Driver.familyName.substring(0,3).toUpperCase();
-               codeEl.style.background = color;
-               codeEl.style.color = ['sauber', 'mercedes', 'williams'].includes(teamId) ? '#000' : '#fff';
+            const codeEl = row.querySelector('.driver-code');
+            if (codeEl) {
+              codeEl.textContent = d.Driver.code || d.Driver.familyName.substring(0, 3).toUpperCase();
+              codeEl.style.background = color;
+              codeEl.style.color = ['sauber', 'mercedes', 'williams'].includes(teamId) ? '#000' : '#fff';
             }
             const teamEl = row.querySelector('.driver-team'); teamEl && (teamEl.innerHTML = `${d.Constructors[0]?.name || ''} · ${d.Driver.nationality}`);
             const ptsEl = row.querySelector('.driver-pts'); ptsEl && (ptsEl.textContent = d.points);
@@ -3117,7 +3170,7 @@
             if (!c) { row.style.display = 'none'; return; }
             const teamId = c.Constructor.constructorId;
             row.style.setProperty('--team-color', getTeamColor(teamId));
-            
+
             const posEl = row.querySelector('.con-pos'); posEl && (posEl.textContent = String(c.position).padStart(2, '0'));
             const nameEl = row.querySelector('.con-name'); nameEl && (nameEl.textContent = c.Constructor.name);
             const engEl = row.querySelector('.con-engine'); engEl && (engEl.textContent = c.Constructor.nationality);
@@ -3130,14 +3183,14 @@
           const results = resultsRes.MRData.RaceTable.Races[0];
           if (results) {
             const head = document.querySelector('.podium-head');
-            if(head) head.textContent = `${results.raceName} · ${results.Circuit.circuitName} · Result`;
+            if (head) head.textContent = `${results.raceName} · ${results.Circuit.circuitName} · Result`;
             const podRows = document.querySelectorAll('.pod-row');
-            for(let i=0; i<3; i++) {
-               const r = results.Results[i];
-               if(!r || !podRows[i]) continue;
-               const nameEl = podRows[i].querySelector('.pod-driver-name'); nameEl && (nameEl.textContent = `${r.Driver.givenName} ${r.Driver.familyName}`);
-               const teamEl = podRows[i].querySelector('.pod-driver-team'); teamEl && (teamEl.textContent = `${r.Constructor.name} · #${r.Driver.permanentNumber}`);
-               const timeEl = podRows[i].querySelector('.pod-time'); timeEl && (timeEl.textContent = r.Time ? r.Time.time : r.status);
+            for (let i = 0; i < 3; i++) {
+              const r = results.Results[i];
+              if (!r || !podRows[i]) continue;
+              const nameEl = podRows[i].querySelector('.pod-driver-name'); nameEl && (nameEl.textContent = `${r.Driver.givenName} ${r.Driver.familyName}`);
+              const teamEl = podRows[i].querySelector('.pod-driver-team'); teamEl && (teamEl.textContent = `${r.Constructor.name} · #${r.Driver.permanentNumber}`);
+              const timeEl = podRows[i].querySelector('.pod-time'); timeEl && (timeEl.textContent = r.Time ? r.Time.time : r.status);
             }
           }
         }
@@ -3146,51 +3199,51 @@
           const races = calRes.MRData.RaceTable.Races;
           const now = new Date();
           let nextFound = false;
-          
-          document.querySelectorAll('.cal-round').forEach((node, idx) => {
-             const race = races[idx];
-             if(!race) return;
-             
-             // Setup Modal click handler
-             node.onclick = () => {
-                const c = race.Circuit;
-                document.getElementById('modalRaceName').textContent = race.raceName;
-                document.getElementById('modalCircuitName').textContent = c.circuitName;
-                document.getElementById('modalLocation').textContent = `${c.Location.locality}, ${c.Location.country}`;
-                document.getElementById('modalWikiLink').href = c.url;
-                document.getElementById('modalMapIframe').src = `https://maps.google.com/maps?q=${c.Location.lat},${c.Location.long}&t=k&z=15&output=embed`;
-                document.getElementById('circuitModal').classList.add('active');
-                setModalView('3d', c.circuitId);
-             };
 
-             const raceTime = race.time ? race.time : '15:00:00Z';
-             const targetTime = new Date(race.date + 'T' + raceTime);
-             
-             node.classList.remove('next', 'done');
-             if (targetTime > now && !nextFound) {
-                node.classList.add('next');
-                nextFound = true;
-                window.F1_NEXT_RACE_TARGET = targetTime.getTime();
-                dynamicTicker.push({ sym: 'NEXT', val: race.raceName.toUpperCase(), pts: targetTime.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})});
-             } else if (targetTime <= now) {
-                node.classList.add('done');
-             }
+          document.querySelectorAll('.cal-round').forEach((node, idx) => {
+            const race = races[idx];
+            if (!race) return;
+
+            // Setup Modal click handler
+            node.onclick = () => {
+              const c = race.Circuit;
+              document.getElementById('modalRaceName').textContent = race.raceName;
+              document.getElementById('modalCircuitName').textContent = c.circuitName;
+              document.getElementById('modalLocation').textContent = `${c.Location.locality}, ${c.Location.country}`;
+              document.getElementById('modalWikiLink').href = c.url;
+              document.getElementById('modalMapIframe').src = `https://maps.google.com/maps?q=${c.Location.lat},${c.Location.long}&t=k&z=15&output=embed`;
+              document.getElementById('circuitModal').classList.add('active');
+              setModalView('3d', c.circuitId);
+            };
+
+            const raceTime = race.time ? race.time : '15:00:00Z';
+            const targetTime = new Date(race.date + 'T' + raceTime);
+
+            node.classList.remove('next', 'done');
+            if (targetTime > now && !nextFound) {
+              node.classList.add('next');
+              nextFound = true;
+              window.F1_NEXT_RACE_TARGET = targetTime.getTime();
+              dynamicTicker.push({ sym: 'NEXT', val: race.raceName.toUpperCase(), pts: targetTime.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) });
+            } else if (targetTime <= now) {
+              node.classList.add('done');
+            }
           });
         }
 
         if (newsRes && newsRes.items) {
-           const items = newsRes.items.slice(0, 4);
-           const newsBlocks = document.querySelectorAll('.news-item');
-           items.forEach((item, i) => {
-             if(!newsBlocks[i]) return;
-             const hlEl = newsBlocks[i].querySelector('.news-headline'); hlEl && (hlEl.textContent = item.title);
-             let desc = item.description.replace(/<[^>]*>?/gm, '').trim();
-             if(desc.length === 0) desc = 'Click to read more details about this latest update...';
-             const bodyEl = newsBlocks[i].querySelector('.news-body'); bodyEl && (bodyEl.textContent = desc.substring(0, 150) + '...');
-             const kickEl = newsBlocks[i].querySelector('.news-kicker'); kickEl && (kickEl.textContent = 'Live Feed');
-             newsBlocks[i].style.cursor = 'pointer';
-             newsBlocks[i].onclick = () => window.open(item.link, '_blank');
-           });
+          const items = newsRes.items.slice(0, 4);
+          const newsBlocks = document.querySelectorAll('.news-item');
+          items.forEach((item, i) => {
+            if (!newsBlocks[i]) return;
+            const hlEl = newsBlocks[i].querySelector('.news-headline'); hlEl && (hlEl.textContent = item.title);
+            let desc = item.description.replace(/<[^>]*>?/gm, '').trim();
+            if (desc.length === 0) desc = 'Click to read more details about this latest update...';
+            const bodyEl = newsBlocks[i].querySelector('.news-body'); bodyEl && (bodyEl.textContent = desc.substring(0, 150) + '...');
+            const kickEl = newsBlocks[i].querySelector('.news-kicker'); kickEl && (kickEl.textContent = 'Live Feed');
+            newsBlocks[i].style.cursor = 'pointer';
+            newsBlocks[i].onclick = () => window.open(item.link, '_blank');
+          });
         }
 
         renderTicker(dynamicTicker);
