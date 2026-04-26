@@ -3000,6 +3000,7 @@
        
        // 1. Update Particles (Spark Trailing)
        const pPos = f1Particles.geometry.attributes.position.array;
+       const pCount = 50; 
        for(let i = pCount - 1; i > 0; i--) {
            pPos[i*3] = pPos[(i-1)*3];
            pPos[i*3+1] = pPos[(i-1)*3+1];
