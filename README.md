@@ -1,5 +1,6 @@
 # Devyansh's Pit Wall · Your Personal F1 2026 Dashboard 🏎️🏁
 
+🚀 **[View Live Demo](https://f1-dashboard-sepia.vercel.app/)**
 Welcome to the **Pit Wall** — a fast, premium, and broadcaster-quality personal Formula 1 dashboard. 
 
 This project distills the most critical information of a bustling race weekend into a single, beautifully designed dashboard. With no complex backend or databases to handle, the lightweight nature of this project makes it accessible anywhere, instantly giving you the overview of the 2026 season.
