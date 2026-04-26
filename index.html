@@ -2098,46 +2098,10 @@
     }
 
     .analytics-panel {
-      flex: 2;
+      flex: 1;
       position: relative;
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
       background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
       z-index: 10;
-    }
-
-    .archive-panel {
-      flex: 1.5;
-      background: #050505;
-      display: flex;
-      flex-direction: column;
-      padding: 24px;
-      gap: 20px;
-      z-index: 20;
-      border-left: 2px solid var(--racing-hot);
-    }
-
-    .archive-header {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--racing-hot);
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      font-weight: 900;
-      padding-bottom: 8px;
-    }
-
-    .video-container {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #111;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative;
-    }
-
-    #modalIconicVideo {
-      width: 100%;
-      height: 100%;
-      border: none;
     }
 
     .modal-circuit-bg {
@@ -2883,21 +2847,6 @@
           </div>
         </div>
 
-        <div class="archive-panel" id="archiveArea">
-          <div class="archive-header">Iconic Archive // 2026 Season</div>
-          <div class="video-container">
-            <iframe id="modalIconicVideo" src="" allow="autoplay; encrypted-media; picture-in-picture"
-              allowfullscreen></iframe>
-          </div>
-          <a id="videoFallback" href="#" target="_blank"
-            style="font-size: 10px; color: var(--racing-hot); text-decoration: underline; margin-top: -10px;">Link to
-            Archive Reel (Manual Access)</a>
-          <div class="h-stat" style="margin-top: 8px;">System Status</div>
-          <div style="font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.6;">
-            Real-time 3D circuit ingestion active. Historical archival access granted. Current track rendering:
-            Professional Grade HQ.
-          </div>
-        </div>
 
         <iframe id="modalMapIframe" src="" loading="lazy"></iframe>
       </div>
@@ -3024,28 +2973,15 @@
       if (b3d) b3d.classList.toggle('active', view === '3d');
       if (bSat) bSat.classList.toggle('active', view === 'sat');
       const area3d = document.getElementById('analyticsArea');
-      const areaArchive = document.getElementById('archiveArea');
       const iframe = document.getElementById('modalMapIframe');
       if (view === '3d') {
-        area3d.style.display = 'block'; areaArchive.style.display = 'flex'; iframe.style.display = 'none';
-        const vMap = {
-          'monaco': '87_C_2r2OXY', 'monza': '9qY_P6o2u9E', 'spa': 'J0_0N5yG3Y4',
-          'silverstone': 'B0KNRuE68T8', 'suzuka': 'Z6X0l0L4_C4', 'bahrain': 'vMap_FkM_Yc',
-          'jeddah': 'ZaqYQ1B_hro', 'albert_park': '96hGqXQ6A3I', 'shanghai': 'RkS3S069s1M',
-          'miami': 'L-C5X9T-FWA', 'rodriguez': 'WbN6e-tB-y4', 'interlagos': 'L0P_0gB19r8',
-          'vegas': 'Z6G0g_D1r8U', 'yas_marina': 'YqP0g_D1r8U'
-        };
-        const videoId = vMap[circuitId] || 'Cpt4S3p6E0I';
-        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&rel=0`;
-        document.getElementById('modalIconicVideo').src = embedUrl;
-        document.getElementById('videoFallback').href = `https://www.youtube.com/watch?v=${videoId}`;
+        area3d.style.display = 'block'; iframe.style.display = 'none';
         initF1Hologram(circuitId || 'generic');
         if (!f1RenderID) animateF1Hologram();
       } else {
-        area3d.style.display = 'none'; areaArchive.style.display = 'none'; iframe.style.display = 'block';
+        area3d.style.display = 'none'; iframe.style.display = 'block';
         if (f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
-        const mapUrl = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
-        iframe.src = mapUrl;
+        iframe.src = `https://www.google.com/maps?q=${circuitId}+f1+circuit&output=embed&t=k`;
       }
     }
 
