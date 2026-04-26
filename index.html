@@ -2905,70 +2905,44 @@
        }
        
        f1Scene = new THREE.Scene();
-       f1Scene.fog = new THREE.FogExp2(0x000000, 0.03);
+       f1Scene.fog = new THREE.FogExp2(0x000000, 0.02);
 
-       f1Camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 500);
-       f1Camera.position.set(0, 40, 60);
-       f1Camera.lookAt(0, 0, 0);
+       f1Camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+       // Camera will be controlled in the animation loop
 
        f1Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
        f1Renderer.setSize(container.clientWidth, container.clientHeight);
        f1Renderer.setPixelRatio(window.devicePixelRatio);
        container.appendChild(f1Renderer.domElement);
 
-       // International Broadcast Lighting
-       f1Scene.add(new THREE.AmbientLight(0x00ffff, 0.2));
-       const keyLight = new THREE.PointLight(0x00ffff, 2, 100);
-       keyLight.position.set(0, 30, 10);
-       f1Scene.add(keyLight);
-
-       // Luxury Reflective Floor
-       const grid = new THREE.GridHelper(100, 50, 0x00ffff, 0x002222);
-       grid.position.y = -6;
-       grid.material.opacity = 0.2;
-       grid.material.transparent = true;
-       f1Scene.add(grid);
+       f1Scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+       const spot = new THREE.SpotLight(0x00ffff, 1);
+       spot.position.set(0, 50, 0);
+       f1Scene.add(spot);
 
        const pts = getF1TrackPath(circuitId);
        const curve = new THREE.CatmullRomCurve3(pts, true);
        f1CompPoints = curve;
        
-       // High-Gloss Track Material
-       const tubeGeo = new THREE.TubeGeometry(curve, 200, 0.6, 16, true);
+       // High-Glow Track (The Path)
+       const tubeGeo = new THREE.TubeGeometry(curve, 300, 0.5, 12, true);
        const tubeMat = new THREE.MeshPhongMaterial({ 
-          color: 0x00ffff, 
-          emissive: 0x003333,
-          specular: 0x00ffff,
-          shininess: 100,
+          color: 0xffffff, 
+          emissive: 0x00ffff, 
+          emissiveIntensity: 5,
           transparent: true,
-          opacity: 0.9
+          opacity: 0.9 
        });
        f1TrackMesh = new THREE.Mesh(tubeGeo, tubeMat);
        f1Scene.add(f1TrackMesh);
 
-       // Energy Light Pulse
-       const pulseGeo = new THREE.TubeGeometry(curve, 200, 0.65, 8, true);
-       const pulseMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
-       const f1Pulse = new THREE.Mesh(pulseGeo, pulseMat);
-       f1Scene.add(f1Pulse);
-
-       // Animated Telemetry Orb
-       const orbGeo = new THREE.SphereGeometry(1.2, 32, 32);
+       // Car / Camera Target
+       const orbGeo = new THREE.SphereGeometry(1, 32, 32);
        const orbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
        f1CarOrb = new THREE.Mesh(orbGeo, orbMat);
-       const flare = new THREE.PointLight(0xffffff, 3, 20);
+       const flare = new THREE.PointLight(0xffffff, 5, 20);
        f1CarOrb.add(flare);
        f1Scene.add(f1CarOrb);
-
-       // Orbit Controls (Simple)
-       let isDrag = false; let oldX = 0;
-       container.onmousedown = (e) => { isDrag = true; oldX = e.clientX; };
-       window.onmouseup = () => { isDrag = false; };
-       window.onmousemove = (e) => {
-          if(!isDrag || !f1Scene) return;
-          f1Scene.rotation.y += (e.clientX - oldX) * 0.005;
-          oldX = e.clientX;
-       };
 
        document.getElementById('h-trackLength').textContent = (5.2 + (pts.length * 0.15)).toFixed(3) + ' KM';
        document.getElementById('h-trackTurns').textContent = (pts.length + 5) + ' CORNERS';
@@ -2978,16 +2952,25 @@
        if(!f1Renderer || !f1Scene) return;
        f1RenderID = requestAnimationFrame(animateF1Hologram);
        
-       const time = Date.now() * 0.0006;
+       const time = Date.now() * 0.0003;
        const t = (time % 1);
        
-       // Track car orb
-       f1CarOrb.position.copy(f1CompPoints.getPointAt(t));
+       // 1. Position Car
+       const pos = f1CompPoints.getPointAt(t);
+       f1CarOrb.position.copy(pos);
        
-       // Smooth cinematic drift
-       f1Camera.position.x = Math.sin(time * 0.15) * 55;
-       f1Camera.position.z = Math.cos(time * 0.15) * 55;
-       f1Camera.lookAt(0, 0, 0);
+       // 2. Position Camera (Follow Cam Like Video)
+       const behind = f1CompPoints.getPointAt((t - 0.02 + 1) % 1);
+       f1Camera.position.set(behind.x, behind.y + 15, behind.z);
+       f1Camera.lookAt(pos);
+
+       // 3. Dynamic Track Drawing (Visual Highlight)
+       f1TrackMesh.rotation.y = Math.sin(time * 0.5) * 0.02;
+
+       // 4. Corner Announcement Logic
+       const currentCorner = Math.floor(t * 19) + 1;
+       const turnEl = document.getElementById('h-trackTurns');
+       if(turnEl) turnEl.textContent = `TURN ${currentCorner} // ACTIVE`;
        
        f1Renderer.render(f1Scene, f1Camera);
     }
