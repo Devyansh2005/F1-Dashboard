@@ -2124,10 +2124,10 @@
       top: 0;
       left: 0;
       background: transparent;
-      z-index: 2;
+      z-index: 5;
     }
 
-    /* Immersive Circuit Image Background */
+    /* Immersive Circuit Image Background - FIXED Z-INDEX */
     .modal-circuit-bg {
        position: absolute;
        top: 0;
@@ -2137,24 +2137,26 @@
        background-image: url('https://images.unsplash.com/photo-1541443131876-bb5bf03c6ba7?auto=format&fit=crop&q=80&w=2670');
        background-size: cover;
        background-position: center;
-       filter: blur(25px) brightness(0.35) saturate(1.2);
-       z-index: -1;
+       filter: blur(40px) brightness(0.3) saturate(1.2);
+       z-index: 1;
+       pointer-events: none;
+       display: block !important;
     }
 
-    /* Iconic Video Panel */
+    /* Iconic Video Panel - FIXED VISIBILITY */
     .iconic-video-wrap {
        position: absolute;
-       top: 24px;
-       right: 24px;
+       top: 100px;
+       right: 32px;
        width: 320px;
        height: 180px;
-       background: rgba(0,0,0,0.4);
-       border: 1px solid rgba(255,255,255,0.1);
-       backdrop-filter: blur(5px);
-       z-index: 10;
-       display: flex;
+       background: #000;
+       border: 1px solid rgba(255,255,255,0.2);
+       box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+       z-index: 20;
+       display: none; /* Shown via JS */
        flex-direction: column;
-       animation: fadeInRight 0.8s ease backwards 0.5s;
+       overflow: hidden;
     }
     .video-label {
        padding: 8px 12px;
@@ -2162,7 +2164,7 @@
        font-size: 9px;
        background: var(--racing-hot);
        color: #000;
-       font-weight: 600;
+       font-weight: 800;
        text-transform: uppercase;
        letter-spacing: 0.15em;
     }
@@ -2181,7 +2183,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      z-index: 3;
+      z-index: 10;
     }
     @keyframes fadeInRight {
       from { opacity: 0; transform: translateX(20px); }
@@ -2879,7 +2881,7 @@
   </div>
 
   <script>
-    let f1Scene, f1Camera, f1Renderer, f1CarOrb, f1RenderID, f1TrackMesh, f1CompPoints;
+    let f1Scene, f1Camera, f1Renderer, f1CarOrb, f1RenderID, f1TrackMesh, f1CompPoints, f1Particles;
 
     function getF1TrackPath(id) {
        // High-Fidelity Professional Vectors for Major Tracks
@@ -2930,36 +2932,57 @@
        f1CompPoints = curve;
        
        // MULTI-COLOR SECTOR TRACK RENDERING
-       const segCount = 300;
-       const tubeGeo = new THREE.TubeGeometry(curve, segCount, 0.6, 12, true);
+       const segCount = 400;
+       const tubeGeo = new THREE.TubeGeometry(curve, segCount, 0.7, 16, true);
        
-       // Build vertex colors for sectors
        const count = tubeGeo.attributes.position.count;
        const colors = new Float32Array(count * 3);
        for(let i=0; i<count; i++) {
-          const ratio = i / count;
+          const ratio = (i / count);
           let r=1, g=1, b=1;
-          if(ratio < 0.33) { r=1; g=0.2; b=0.1; } // S1: Red
-          else if(ratio < 0.66) { r=1; g=0.9; b=0.1; } // S2: Yellow
+          if(ratio < 0.33) { r=0.8; g=0; b=1; } // S1: Purple
+          else if(ratio < 0.66) { r=1; g=1; b=0; } // S2: Yellow
           else { r=0; g=1; b=1; } // S3: Cyan
           colors[i*3] = r; colors[i*3+1] = g; colors[i*3+2] = b;
        }
        tubeGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
        
-       const tubeMat = new THREE.MeshPhongMaterial({ 
+       const tubeMat = new THREE.MeshPhysicalMaterial({ 
           vertexColors: true,
-          emissive: 0x333333,
+          emissive: 0x222222,
+          roughness: 0,
+          metalness: 1,
+          reflectivity: 1,
+          clearcoat: 1,
           transparent: true,
           opacity: 0.95
        });
        f1TrackMesh = new THREE.Mesh(tubeGeo, tubeMat);
        f1Scene.add(f1TrackMesh);
 
+       // Reflection Floor
+       const floorGeo = new THREE.PlaneGeometry(1000, 1000);
+       const floorMat = new THREE.MeshStandardMaterial({ color: 0x010101, roughness: 0.1, metalness: 0.9 });
+       const floor = new THREE.Mesh(floorGeo, floorMat);
+       floor.rotation.x = -Math.PI / 2;
+       floor.position.y = -12;
+       f1Scene.add(floor);
+
+       // Spark Particles
+       const partGeo = new THREE.BufferGeometry();
+       const partCount = 50;
+       const partPos = new Float32Array(partCount * 3);
+       for(let i=0; i<partCount; i++) { partPos[i*3] = 0; partPos[i*3+1] = 0; partPos[i*3+2] = 0; }
+       partGeo.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+       const partMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.4, transparent: true, blending: THREE.AdditiveBlending });
+       f1Particles = new THREE.Points(partGeo, partMat);
+       f1Scene.add(f1Particles);
+
        // Car Orb with Flare
-       const orbGeo = new THREE.SphereGeometry(1.4, 32, 32);
+       const orbGeo = new THREE.SphereGeometry(1.6, 32, 32);
        const orbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
        f1CarOrb = new THREE.Mesh(orbGeo, orbMat);
-       f1CarOrb.add(new THREE.PointLight(0xffffff, 6, 30));
+       f1CarOrb.add(new THREE.PointLight(0xffffff, 10, 40));
        f1Scene.add(f1CarOrb);
 
        document.getElementById('h-trackLength').textContent = (5.2 + (pts.length * 0.15)).toFixed(3) + ' KM';
@@ -2975,14 +2998,26 @@
        const pos = f1CompPoints.getPointAt(t);
        f1CarOrb.position.copy(pos);
        
-       // Zandvoort-Style Cinematic Chaser (Slightly further back for better scale)
+       // 1. Update Particles (Spark Trailing)
+       const pPos = f1Particles.geometry.attributes.position.array;
+       for(let i = pCount - 1; i > 0; i--) {
+           pPos[i*3] = pPos[(i-1)*3];
+           pPos[i*3+1] = pPos[(i-1)*3+1];
+           pPos[i*3+2] = pPos[(i-1)*3+2];
+       }
+       pPos[0] = pos.x + (Math.random()-0.5)*2;
+       pPos[1] = pos.y + (Math.random()-0.5)*2;
+       pPos[2] = pos.z + (Math.random()-0.5)*2;
+       f1Particles.geometry.attributes.position.needsUpdate = true;
+
+       // 2. Cinematic Chaser
        const behind = f1CompPoints.getPointAt((t - 0.08 + 1) % 1);
-       f1Camera.position.set(behind.x, behind.y + 35, behind.z);
+       f1Camera.position.lerp(new THREE.Vector3(behind.x, behind.y + 40, behind.z), 0.1);
        f1Camera.lookAt(pos);
 
-       // Dynamic Sector / Turn Intelligence
+       // 3. Dynamic Sector Intelligence
        const sector = t < 0.33 ? 1 : t < 0.66 ? 2 : 3;
-       const sCol = sector === 1 ? '#ff3311' : sector === 2 ? '#ffdd11' : '#00ffff';
+       const sCol = sector === 1 ? '#a832ff' : sector === 2 ? '#ffdd11' : '#00ffff';
        
        const secEl = document.getElementById('h-sectorLabel');
        if(secEl) {
@@ -3002,23 +3037,38 @@
        if(btn3d) btn3d.classList.toggle('active', view === '3d');
        if(btnSat) btnSat.classList.toggle('active', view === 'sat');
        
-       document.getElementById('modal3dCanvas').style.display = view === '3d' ? 'block' : 'none';
-       document.getElementById('hologramStats').style.display = view === '3d' ? 'flex' : 'none';
-       document.getElementById('videoPanel').style.display = view === '3d' ? 'flex' : 'none';
-       document.getElementById('modalBgImg').style.display = view === '3d' ? 'block' : 'none';
-       document.getElementById('modalMapIframe').style.display = view === 'sat' ? 'block' : 'none';
-       
+       const canvas = document.getElementById('modal3dCanvas');
+       const stats = document.getElementById('hologramStats');
+       const videoP = document.getElementById('videoPanel');
+       const bgImg = document.getElementById('modalBgImg');
+       const iframe = document.getElementById('modalMapIframe');
+
        if(view === '3d') {
-          // Map iconic video IDs
+          canvas.style.display = 'block';
+          stats.style.display = 'flex';
+          videoP.style.display = 'flex';
+          bgImg.style.display = 'block';
+          iframe.style.display = 'none';
+
+          // Comprehensive Video Mapping
           const vMap = {
              'monaco': 'P_pI_H_L1_U', 'monza': 'V_25v_e05qI', 'spa': 'J0_0N5yG3Y4', 
-             'silverstone': 'B0KNRuE68T8', 'suzuka': 'Z6X0l0L4_C4'
+             'silverstone': 'B0KNRuE68T8', 'suzuka': 'Z6X0l0L4_C4', 'bahrain': 'vMap_FkM_Yc',
+             'jeddah': 'ZaqYQ1B_hro', 'albert_park': '96hGqXQ6A3I', 'shanghai': 'RkS3S069s1M',
+             'miami': 'L-C5X9T-FWA', 'rodriguez': 'WbN6e-tB-y4', 'interlagos': 'L0P_0gB19r8',
+             'vegas': 'Z6G0g_D1r8U', 'yas_marina': 'L0g_0gB19r8'
           };
-          document.getElementById('modalIconicVideo').src = `https://www.youtube.com/embed/${vMap[circuitId] || 'vMap_FkM_Yc'}?autoplay=1&mute=1&loop=1&playlist=${vMap[circuitId] || 'vMap_FkM_Yc'}`;
+          const videoId = vMap[circuitId] || 'vMap_FkM_Yc';
+          document.getElementById('modalIconicVideo').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
           
           initF1Hologram(circuitId || 'generic');
           if(!f1RenderID) animateF1Hologram();
        } else {
+          canvas.style.display = 'none';
+          stats.style.display = 'none';
+          videoP.style.display = 'none';
+          bgImg.style.display = 'none';
+          iframe.style.display = 'block';
           if(f1RenderID) { cancelAnimationFrame(f1RenderID); f1RenderID = null; }
        }
     }
