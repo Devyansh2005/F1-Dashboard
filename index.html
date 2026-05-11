@@ -2475,7 +2475,7 @@
             <div class="driver-pts-sub">pts</div>
           </div>
         </div>
-        <div class="driver-row fav-driver" style="--team-color: var(--ferrari); animation-delay:4.74s;">
+        <div class="driver-row" style="--team-color: var(--ferrari); animation-delay:4.74s;">
           <div class="driver-pos">04</div>
           <div class="driver-info">
             <div class="driver-line"><span class="driver-name">L. Hamilton</span><span class="driver-code"
@@ -3141,6 +3141,14 @@
             const teamId = d.Constructors[0]?.constructorId;
             const color = getTeamColor(teamId);
             row.style.setProperty('--team-color', color);
+
+            // Dynamically assign fav-driver class — always tracks Hamilton by name
+            const isHam = d.Driver.familyName === 'Hamilton';
+            row.classList.toggle('fav-driver', isHam);
+            if (isHam) {
+              const gap = parseInt(drvList[0].points) - parseInt(d.points);
+              dynamicTicker.push({ sym: 'HAM', val: 'P' + d.position + ' · ' + d.points + ' pts', pts: '−' + gap + ' to lead' });
+            }
 
             const posEl = row.querySelector('.driver-pos'); posEl && (posEl.textContent = String(d.position).padStart(2, '0'));
             const nameEl = row.querySelector('.driver-name'); nameEl && (nameEl.textContent = d.Driver.givenName.charAt(0) + '. ' + d.Driver.familyName);
