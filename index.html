@@ -3039,13 +3039,12 @@
 
     // Ticker Loop and Next Race Timer state initialization
     let STATIC_TICKER = [
-      { sym: 'FAV DRIVER', val: 'HAMILTON', pts: 'P4 · 41 pts' },
-      { sym: 'FAV TEAM', val: 'FERRARI', pts: 'P2 WCC' },
-      { sym: 'FL', val: 'RUSSELL', pts: '1:28.411' },
-      { sym: 'FAST PIT', val: 'MCLAREN', pts: '1.94s' },
-      { sym: 'HAM GAP', val: '−31 PTS', pts: 'TO LEAD' },
+      { sym: 'FAV DRIVER', val: 'HAMILTON', pts: 'P5 · Ferrari' },
+      { sym: 'FAV TEAM',   val: 'FERRARI',  pts: 'WCC standings' },
+      { sym: 'FL',         val: 'RUSSELL',  pts: '1:28.411' },
+      { sym: 'FAST PIT',   val: 'MCLAREN',  pts: '1.94s' },
+      { sym: 'NEXT RACE',  val: 'CANADA',   pts: 'May 22–24' },
     ];
-    let F1_TARGET_DATE = new Date('2026-05-24T18:00:00Z').getTime(); // Canadian GP – Race day
 
     function renderTicker(additions) {
       const items = additions ? [...additions, ...STATIC_TICKER] : STATIC_TICKER;
@@ -3054,11 +3053,41 @@
       document.getElementById('tkTrack').innerHTML = half + half;
     }
     renderTicker();
+    // 2026 F1 Race Schedule – used for countdown (API-independent)
+    const F1_2026_SCHEDULE = [
+      { name: 'Australian GP',   date: '2026-03-08T06:00:00Z' },
+      { name: 'Chinese GP',      date: '2026-03-15T07:00:00Z' },
+      { name: 'Japanese GP',     date: '2026-03-29T05:00:00Z' },
+      { name: 'Miami GP',        date: '2026-05-04T19:00:00Z' },
+      { name: 'Canadian GP',     date: '2026-05-24T18:00:00Z' },
+      { name: 'Monaco GP',       date: '2026-06-07T13:00:00Z' },
+      { name: 'Spanish GP',      date: '2026-06-14T13:00:00Z' },
+      { name: 'Austrian GP',     date: '2026-06-28T13:00:00Z' },
+      { name: 'British GP',      date: '2026-07-05T14:00:00Z' },
+      { name: 'Belgian GP',      date: '2026-07-26T13:00:00Z' },
+      { name: 'Hungarian GP',    date: '2026-08-02T13:00:00Z' },
+      { name: 'Dutch GP',        date: '2026-08-23T13:00:00Z' },
+      { name: 'Italian GP',      date: '2026-09-06T13:00:00Z' },
+      { name: 'Madrid GP',       date: '2026-09-13T13:00:00Z' },
+      { name: 'Azerbaijan GP',   date: '2026-09-27T11:00:00Z' },
+      { name: 'Singapore GP',    date: '2026-10-11T08:00:00Z' },
+      { name: 'US GP',           date: '2026-10-25T19:00:00Z' },
+      { name: 'Mexico City GP',  date: '2026-11-01T19:00:00Z' },
+      { name: 'São Paulo GP',    date: '2026-11-08T17:00:00Z' },
+      { name: 'Las Vegas GP',    date: '2026-11-21T06:00:00Z' },
+      { name: 'Qatar GP',        date: '2026-11-29T13:00:00Z' },
+      { name: 'Abu Dhabi GP',    date: '2026-12-06T13:00:00Z' },
+    ];
+    const nextRace = F1_2026_SCHEDULE.find(r => new Date(r.date) > new Date());
+    let F1_TARGET_DATE = nextRace ? new Date(nextRace.date).getTime() : Date.now();
 
     (function () {
       const pad = (n) => String(n).padStart(2, '0');
       function tick() {
-        if (window.F1_NEXT_RACE_TARGET) F1_TARGET_DATE = window.F1_NEXT_RACE_TARGET;
+        // Only allow API override if it gives a future date
+        if (window.F1_NEXT_RACE_TARGET && window.F1_NEXT_RACE_TARGET > Date.now()) {
+          F1_TARGET_DATE = window.F1_NEXT_RACE_TARGET;
+        }
         const diff = F1_TARGET_DATE - Date.now();
         if (diff <= 0) {
           ['cd-d', 'cd-h', 'cd-m', 'cd-s'].forEach(id => {
