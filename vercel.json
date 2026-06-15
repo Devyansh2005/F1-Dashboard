@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "buildCommand": "echo 'No build required'",
+  "rewrites": [
+    {
+      "source": "/images/(.*)",
+      "destination": "/public/images/$1"
+    }
+  ]
+}
