@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Profiles · F1 Pit Wall</title>
+  <meta name="description" content="Explore interactive, high-fidelity biographical and professional profiles of F1 drivers, in the style of Kym Millman.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #050505;
+      --paper: rgba(20, 20, 25, 0.65);
+      --paper-hover: rgba(30, 30, 35, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --racing-hot: #ff3636;
+      --ink-1: #ffffff;
+      --ink-2: #a0a0b0;
+      --ink-3: #606070;
+
+      /* Team Colors */
+      --mercedes: #00a19c;
+      --ferrari: #ef1a2d;
+      --redbull: #0600ef;
+      --mclaren: #ff8700;
+      --aston: #229955;
+      --williams: #005aff;
+      --alpine: #0090ff;
+      --haas: #f0f0f0;
+      --racingbulls: #4e7cff;
+      --audi: #f50a20;
+      --cadillac: #002d62;
+      --sauber: #00e701;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 54, 54, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 161, 156, 0.04) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      color: var(--ink-1);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* HEADER */
+    header {
+      padding: 40px 60px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(5, 5, 5, 0.8);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title em {
+      font-style: italic;
+      color: var(--racing-hot);
+    }
+
+    .brand-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      margin-top: 4px;
+    }
+
+    .nav-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--ink-1);
+      text-decoration: none;
+      border: 1px solid var(--glass-border);
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .nav-btn:hover {
+      background: var(--racing-hot);
+      border-color: var(--racing-hot);
+      box-shadow: 0 0 15px rgba(255, 54, 54, 0.4);
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 60px;
+    }
+
+    /* STATUS BANNER */
+    .status-banner {
+      background: rgba(255, 54, 54, 0.1);
+      border: 1px solid rgba(255, 54, 54, 0.2);
+      padding: 16px 24px;
+      margin-bottom: 40px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #ff8888;
+    }
+
+    .status-text strong {
+      color: #ffffff;
+    }
+
+    /* FILTERS & SEARCH */
+    .filter-bar {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 300px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--paper);
+      border: 1px solid var(--glass-border);
+      padding: 16px 24px;
+      color: var(--ink-1);
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--racing-hot);
+      box-shadow: 0 0 15px rgba(255, 54, 54, 0.15);
+      background: var(--paper-hover);
+    }
+
+    .filter-select {
+      background: var(--paper);
+      border: 1px solid var(--glass-border);
+      padding: 16px 24px;
+      color: var(--ink-1);
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      outline: none;
+      cursor: pointer;
+      min-width: 200px;
+      transition: all 0.3s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+      background-repeat: no-repeat;
+      background-position-x: calc(100% - 16px);
+      background-position-y: 50%;
+    }
+
+    .filter-select:focus, .filter-select:hover {
+      border-color: var(--ink-1);
+      background-color: var(--paper-hover);
+    }
+
+    /* DRIVER GRID */
+    .driver-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+    }
+
+    .driver-card {
+      background: var(--paper);
+      border: 1px solid var(--glass-border);
+      border-top: 4px solid var(--team-color, var(--ink-3));
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      display: flex;
+      flex-direction: column;
+      height: 380px;
+      backdrop-filter: blur(12px);
+    }
+
+    .driver-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 100%, var(--team-color, transparent) 0%, transparent 75%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .driver-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--team-color, var(--ink-1));
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--team-color-rgb), 0.15);
+    }
+
+    .driver-card:hover::before {
+      opacity: 0.15;
+    }
+
+    .card-top {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 2;
+    }
+
+    .driver-num-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.1);
+      transition: color 0.3s ease;
+    }
+
+    .driver-card:hover .driver-num-badge {
+      color: var(--team-color, rgba(255, 255, 255, 0.3));
+    }
+
+    .team-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      border: 1px solid var(--glass-border);
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .card-image-wrap {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      margin-top: -20px;
+    }
+
+    .driver-img {
+      max-height: 240px;
+      width: auto;
+      object-fit: contain;
+      filter: grayscale(20%) drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+      transition: all 0.4s ease;
+      z-index: 2;
+    }
+
+    .driver-card:hover .driver-img {
+      filter: grayscale(0%) scale(1.04) drop-shadow(0 15px 25px rgba(0,0,0,0.6));
+    }
+
+    .driver-placeholder-avatar {
+      font-family: 'Playfair Display', serif;
+      font-size: 80px;
+      color: rgba(255, 255, 255, 0.05);
+      z-index: 1;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      font-style: italic;
+    }
+
+    .card-bottom {
+      padding: 24px;
+      background: rgba(10, 10, 15, 0.8);
+      border-top: 1px solid var(--glass-border);
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .driver-title-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink-1);
+      letter-spacing: -0.01em;
+    }
+
+    .driver-title-surname {
+      text-transform: uppercase;
+    }
+
+    .driver-nationality-text {
+      font-size: 12px;
+      color: var(--ink-2);
+      margin-top: 2px;
+    }
+
+    .driver-code-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 800;
+      background: var(--team-color, var(--ink-3));
+      color: #000;
+      padding: 4px 8px;
+    }
+
+    /* DETAILED PROFILE DRAWER/MODAL */
+    .profile-overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(15px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .profile-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .profile-drawer {
+      width: 100%;
+      max-width: 650px;
+      height: 100%;
+      background: #09090b;
+      border-left: 1px solid var(--glass-border);
+      box-shadow: -20px 0 40px rgba(0, 0, 0, 0.8);
+      transform: translateX(100%);
+      transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .profile-overlay.active .profile-drawer {
+      transform: translateX(0);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      color: var(--ink-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: var(--racing-hot);
+      border-color: var(--racing-hot);
+      box-shadow: 0 0 15px rgba(255, 54, 54, 0.5);
+    }
+
+    .drawer-hero {
+      padding: 60px 48px 40px;
+      background: radial-gradient(circle at 100% 0%, var(--team-color-alpha, transparent) 0%, transparent 70%);
+      border-bottom: 1px solid var(--glass-border);
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .hero-img-wrap {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 2px solid var(--team-color, var(--glass-border));
+      background: rgba(0,0,0,0.5);
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .hero-img-wrap img {
+      width: 90%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .hero-text-wrap {
+      flex: 1;
+    }
+
+    .hero-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--team-color, var(--racing-hot));
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .hero-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .hero-team {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--ink-2);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .drawer-body {
+      padding: 40px 48px;
+      flex: 1;
+    }
+
+    .info-section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: var(--ink-2);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-val {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink-1);
+    }
+
+    .info-val.mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .icon-list {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .interactive-icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink-2);
+      transition: all 0.3s ease;
+    }
+
+    .interactive-icon:hover {
+      border-color: var(--ink-1);
+      color: var(--ink-1);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-3px);
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 40px 60px;
+      border-top: 1px solid var(--glass-border);
+      background: rgba(5,5,5,0.9);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-3);
+    }
+
+    .f-brand em {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--ink-2);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      header {
+        padding: 30px;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      .container {
+        padding: 30px;
+      }
+      footer {
+        padding: 30px;
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="brand-group">
+      <h1 class="brand-title">Pit Wall · <em>Drivers</em></h1>
+      <div class="brand-subtitle">Broadcast Driver Database</div>
+    </div>
+    <a href="index.html" class="nav-btn">← Pit Wall Dashboard</a>
+  </header>
+
+  <div class="container">
+    
+    <!-- Backend Connection Warning Banner -->
+    <div class="status-banner" id="statusBanner">
+      <div class="status-text" id="statusText">
+        ⚠️ <strong>Backend Server Offline</strong>. Run <code>node backend/server.js</code> to connect the SQLite Database. Using local fallback data.
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search by name, code, nationality...">
+      </div>
+      
+      <select class="filter-select" id="teamFilter">
+        <option value="">All Teams</option>
+        <option value="Mercedes">Mercedes-AMG</option>
+        <option value="Ferrari">Scuderia Ferrari</option>
+        <option value="Red Bull">Red Bull Racing</option>
+        <option value="McLaren">McLaren</option>
+        <option value="Alpine">Alpine</option>
+        <option value="Racing Bulls">Racing Bulls</option>
+        <option value="Williams">Williams</option>
+        <option value="Haas">Haas F1</option>
+        <option value="Sauber">Sauber / Audi</option>
+        <option value="Aston Martin">Aston Martin</option>
+      </select>
+    </div>
+
+    <!-- Drivers Grid -->
+    <div class="driver-grid" id="driverGrid">
+      <!-- Cards rendered dynamically -->
+    </div>
+
+  </div>
+
+  <!-- Profile Overlay Drawer -->
+  <div class="profile-overlay" id="profileOverlay" onclick="closeProfile()">
+    <div class="profile-drawer" id="profileDrawer" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeProfile()" aria-label="Close profile">✕</button>
+      
+      <div class="drawer-hero" id="drawerHero">
+        <!-- Hero Details Rendered Dynamically -->
+      </div>
+      
+      <div class="drawer-body">
+        <div class="info-section">
+          <h3 class="section-title">Biographical Details</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Born</span>
+              <span class="info-val" id="profileDob"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Place of Birth</span>
+              <span class="info-val" id="profilePob"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Nationality</span>
+              <span class="info-val" id="profileNationality"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Languages Spoken</span>
+              <span class="info-val" id="profileLanguages"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Height</span>
+              <span class="info-val" id="profileHeight"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Weight</span>
+              <span class="info-val" id="profileWeight"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="section-title">Career Statistics</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">First Race</span>
+              <span class="info-val" id="profileFirstRace"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Grand Prix Wins</span>
+              <span class="info-val mono" id="profileWins"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Grand Prix Podiums</span>
+              <span class="info-val mono" id="profilePodiums"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Helmet Brand</span>
+              <span class="info-val" id="profileHelmet"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="section-title">Management &amp; Support</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Manager / Management</span>
+              <span class="info-val" id="profileManager"></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Performance Trainer</span>
+              <span class="info-val" id="profileTrainer"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="section-title">Kym Millman Photography</h3>
+          <span class="info-label">Social &amp; Photography Intel</span>
+          <div class="icon-list">
+            <div class="interactive-icon" title="View Racing Gallery" onclick="alert('Viewing high-res trackside shots gallery...')">📷</div>
+            <div class="interactive-icon" title="Helmet Closeups" onclick="alert('Viewing detailed lid art portfolio...')">🪖</div>
+            <div class="interactive-icon" title="Paddock Walk Intel" onclick="alert('Viewing Kym Millman paddock walk profile vlog...')">🎥</div>
+            <div class="interactive-icon" title="Wikipedia Biography" id="profileWiki" onclick="window.open(this.dataset.url, '_blank')">🌐</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="f-note">PIT WALL BROADCAST DATABASE · EYES ONLY</div>
+    <div class="f-brand">The <em>Pit Wall</em></div>
+  </footer>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    let driversData = [];
+
+    // Fallback static data in case the server is offline
+    const fallbackDrivers = [
+      { driverId: 'antonelli', code: 'ANT', permanentNumber: 12, givenName: 'Andrea Kimi', familyName: 'Antonelli', nationality: 'Italian', team: 'Mercedes-AMG', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2025/drivers/ANDANT01.png' },
+      { driverId: 'hamilton', code: 'HAM', permanentNumber: 44, givenName: 'Lewis', familyName: 'Hamilton', nationality: 'British', team: 'Scuderia Ferrari', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/LEWHAM01.png' },
+      { driverId: 'russell', code: 'RUS', permanentNumber: 63, givenName: 'George', familyName: 'Russell', nationality: 'British', team: 'Mercedes-AMG', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/GEORUS01.png' },
+      { driverId: 'leclerc', code: 'LEC', permanentNumber: 16, givenName: 'Charles', familyName: 'Leclerc', nationality: 'Monegasque', team: 'Scuderia Ferrari', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/CHALEC01.png' },
+      { driverId: 'norris', code: 'NOR', permanentNumber: 4, givenName: 'Lando', familyName: 'Norris', nationality: 'British', team: 'McLaren', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/LANNOR01.png' },
+      { driverId: 'piastri', code: 'PIA', permanentNumber: 81, givenName: 'Oscar', familyName: 'Piastri', nationality: 'Australian', team: 'McLaren', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/OSCPIA01.png' },
+      { driverId: 'verstappen', code: 'VER', permanentNumber: 1, givenName: 'Max', familyName: 'Verstappen', nationality: 'Dutch', team: 'Red Bull Racing', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/MAXVER01.png' },
+      { driverId: 'gasly', code: 'GAS', permanentNumber: 10, givenName: 'Pierre', familyName: 'Gasly', nationality: 'French', team: 'Alpine', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/PIEGAS01.png' },
+      { driverId: 'hadjar', code: 'HAD', permanentNumber: 6, givenName: 'Isack', familyName: 'Hadjar', nationality: 'French', team: 'Red Bull Racing', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2025/drivers/ISAHAD01.png' },
+      { driverId: 'lawson', code: 'LAW', permanentNumber: 30, givenName: 'Liam', familyName: 'Lawson', nationality: 'New Zealander', team: 'Racing Bulls', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/LIALAW01.png' }
+    ];
+
+    const fallbackProfiles = {
+      'antonelli': { driverId: 'antonelli', permanentNumber: 12, code: 'ANT', url: 'https://en.wikipedia.org/wiki/Andrea_Kimi_Antonelli', givenName: 'Andrea Kimi', familyName: 'Antonelli', dateOfBirth: '2006-08-25', nationality: 'Italian', placeOfBirth: 'Bologna, Italy', height: '1.76 m', weight: '63 kg', team: 'Mercedes-AMG', firstRace: '2026 Bahrain Grand Prix', careerPodiums: 5, careerWins: 5, manager: 'Toto Wolff', trainer: 'Mercedes Staff', languages: 'Italian, English', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2025/drivers/ANDANT01.png' },
+      'hamilton': { driverId: 'hamilton', permanentNumber: 44, code: 'HAM', url: 'http://en.wikipedia.org/wiki/Lewis_Hamilton', givenName: 'Lewis', familyName: 'Hamilton', dateOfBirth: '1985-01-07', nationality: 'British', placeOfBirth: 'Stevenage, Hertfordshire, UK', height: '1.74 m', weight: '73 kg', team: 'Scuderia Ferrari', firstRace: '2007 Australian Grand Prix', careerPodiums: 202, careerWins: 104, manager: 'Penni Thow', trainer: 'Steve Lord', languages: 'English', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/LEWHAM01.png' },
+      'russell': { driverId: 'russell', permanentNumber: 63, code: 'RUS', url: 'http://en.wikipedia.org/wiki/George_Russell_(driver)', givenName: 'George', familyName: 'Russell', dateOfBirth: '1998-02-15', nationality: 'British', placeOfBirth: 'King\'s Lynn, Norfolk, UK', height: '1.85 m', weight: '70 kg', team: 'Mercedes-AMG', firstRace: '2019 Australian Grand Prix', careerPodiums: 15, careerWins: 3, manager: 'Mercedes Management', trainer: 'Aleix Casanovas', languages: 'English', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/GEORUS01.png' },
+      'leclerc': { driverId: 'leclerc', permanentNumber: 16, code: 'LEC', url: 'http://en.wikipedia.org/wiki/Charles_Leclerc', givenName: 'Charles', familyName: 'Leclerc', dateOfBirth: '1997-10-16', nationality: 'Monegasque', placeOfBirth: 'Monte Carlo, Monaco', height: '1.80 m', weight: '69 kg', team: 'Scuderia Ferrari', firstRace: '2018 Australian Grand Prix', careerPodiums: 32, careerWins: 6, manager: 'Nicolas Todt', trainer: 'Andrea Ferrari', languages: 'French, Italian, English', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/CHALEC01.png' },
+      'norris': { driverId: 'norris', permanentNumber: 4, code: 'NOR', url: 'http://en.wikipedia.org/wiki/Lando_Norris', givenName: 'Lando', familyName: 'Norris', dateOfBirth: '1999-11-13', nationality: 'British', placeOfBirth: 'Bristol, Gloucestershire, UK', height: '1.70 m', weight: '68 kg', team: 'McLaren', firstRace: '2019 Australian Grand Prix', careerPodiums: 26, careerWins: 2, manager: 'Mark Berryman', trainer: 'Jon Malvern', languages: 'English', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/LANNOR01.png' },
+      'piastri': { driverId: 'piastri', permanentNumber: 81, code: 'PIA', url: 'http://en.wikipedia.org/wiki/Oscar_Piastri', givenName: 'Oscar', familyName: 'Piastri', dateOfBirth: '2001-04-06', nationality: 'Australian', placeOfBirth: 'Melbourne, Victoria, Australia', height: '1.78 m', weight: '68 kg', team: 'McLaren', firstRace: '2023 Bahrain Grand Prix', careerPodiums: 10, careerWins: 2, manager: 'Mark Webber', trainer: 'Kim Keedle', languages: 'English', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/OSCPIA01.png' },
+      'verstappen': { driverId: 'verstappen', permanentNumber: 1, code: 'VER', url: 'http://en.wikipedia.org/wiki/Max_Verstappen', givenName: 'Max', familyName: 'Verstappen', dateOfBirth: '1997-09-30', nationality: 'Dutch', placeOfBirth: 'Hasselt, Belgium', height: '1.81 m', weight: '72 kg', team: 'Red Bull Racing', firstRace: '2015 Australian Grand Prix', careerPodiums: 106, careerWins: 61, manager: 'Raymond Vermeulen', trainer: 'Rupert Manwaring', languages: 'Dutch, English, German', helmetBrand: 'Schuberth', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/MAXVER01.png' },
+      'gasly': { driverId: 'gasly', permanentNumber: 10, code: 'GAS', url: 'http://en.wikipedia.org/wiki/Pierre_Gasly', givenName: 'Pierre', familyName: 'Gasly', dateOfBirth: '1996-02-07', nationality: 'French', placeOfBirth: 'Rouen, Normandy, France', height: '1.77 m', weight: '70 kg', team: 'Alpine', firstRace: '2017 Malaysian Grand Prix', careerPodiums: 4, careerWins: 1, manager: 'Guillaume Le Goff', trainer: 'Pyry Salmela', languages: 'French, English, Italian', helmetBrand: 'Bell', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/PIEGAS01.png' },
+      'hadjar': { driverId: 'hadjar', permanentNumber: 6, code: 'HAD', url: 'https://en.wikipedia.org/wiki/Isack_Hadjar', givenName: 'Isack', familyName: 'Hadjar', dateOfBirth: '2004-09-28', nationality: 'French', placeOfBirth: 'Paris, Île-de-France, France', height: '1.70 m', weight: '62 kg', team: 'Red Bull Racing', firstRace: '2026 Bahrain Grand Prix', careerPodiums: 1, careerWins: 0, manager: 'Red Bull Academy', trainer: 'Red Bull Trainer', languages: 'French, English', helmetBrand: 'Arai', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2025/drivers/ISAHAD01.png' },
+      'lawson': { driverId: 'lawson', permanentNumber: 30, code: 'LAW', url: 'http://en.wikipedia.org/wiki/Liam_Lawson', givenName: 'Liam', familyName: 'Lawson', dateOfBirth: '2002-02-11', nationality: 'New Zealander', placeOfBirth: 'Hastings, Hawke\'s Bay, New Zealand', height: '1.74 m', weight: '65 kg', team: 'Racing Bulls', firstRace: '2023 Dutch Grand Prix', careerPodiums: 0, careerWins: 0, manager: 'Ken Smith', trainer: 'Racing Bulls Trainer', languages: 'English', helmetBrand: 'Arai', imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/2024/drivers/LIALAW01.png' }
+    };
+
+    const teamHexMap = {
+      'mercedes': '#00a19c', 'mercedes-amg': '#00a19c',
+      'ferrari': '#ef1a2d', 'scuderia ferrari': '#ef1a2d',
+      'red bull': '#0600ef', 'red bull racing': '#0600ef',
+      'mclaren': '#ff8700',
+      'aston martin': '#229955',
+      'williams': '#005aff',
+      'alpine': '#0090ff',
+      'haas': '#f0f0f0', 'haas f1': '#f0f0f0',
+      'racing bulls': '#4e7cff',
+      'audi': '#f50a20', 'sauber': '#00e701'
+    };
+
+    const teamRGBMap = {
+      'mercedes': '0, 161, 156', 'mercedes-amg': '0, 161, 156',
+      'ferrari': '239, 26, 45', 'scuderia ferrari': '239, 26, 45',
+      'red bull': '6, 0, 239', 'red bull racing': '6, 0, 239',
+      'mclaren': '255, 135, 0',
+      'aston martin': '34, 153, 85',
+      'williams': '0, 90, 255',
+      'alpine': '0, 144, 255',
+      'haas': '240, 240, 240', 'haas f1': '240, 240, 240',
+      'racing bulls': '78, 124, 255',
+      'audi': '245, 10, 32', 'sauber': '0, 231, 1'
+    };
+
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadDrivers();
+      
+      document.getElementById('searchInput').addEventListener('input', filterDrivers);
+      document.getElementById('teamFilter').addEventListener('change', filterDrivers);
+    });
+
+    // Fetch Drivers List
+    async function loadDrivers() {
+      try {
+        const response = await fetch(`${API_URL}/drivers`);
+        if (!response.ok) throw new Error('API server unreachable');
+        
+        driversData = await response.json();
+        console.log('Loaded drivers from Express API.');
+      } catch (err) {
+        console.warn('Backend server offline. Displaying fallback mock drivers.');
+        document.getElementById('statusBanner').style.display = 'flex';
+        driversData = fallbackDrivers;
+      }
+      
+      renderDrivers(driversData);
+    }
+
+    // Render Driver Cards
+    function renderDrivers(list) {
+      const grid = document.getElementById('driverGrid');
+      grid.innerHTML = '';
+
+      if (list.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--ink-3); padding: 60px; font-family: 'JetBrains Mono', monospace;">No drivers match the criteria.</div>`;
+        return;
+      }
+
+      list.forEach(driver => {
+        const tColor = teamHexMap[driver.team.toLowerCase()] || '#a0a0b0';
+        const tRGB = teamRGBMap[driver.team.toLowerCase()] || '160, 160, 176';
+        
+        const card = document.createElement('div');
+        card.className = 'driver-card';
+        card.style.setProperty('--team-color', tColor);
+        card.style.setProperty('--team-color-rgb', tRGB);
+        card.onclick = () => showProfile(driver.driverId);
+
+        // Header Top
+        const cardTop = document.createElement('div');
+        cardTop.className = 'card-top';
+        cardTop.innerHTML = `
+          <span class="team-badge">${driver.team}</span>
+          <span class="driver-num-badge">${driver.permanentNumber ? String(driver.permanentNumber).padStart(2, '0') : ''}</span>
+        `;
+        card.appendChild(cardTop);
+
+        // Image Center
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'card-image-wrap';
+        if (driver.imageUrl && driver.imageUrl !== '/images/drivers/placeholder.jpg') {
+          imgWrap.innerHTML = `<img src="${driver.imageUrl}" alt="${driver.givenName} ${driver.familyName}" class="driver-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="driver-placeholder-avatar" style="display:none;">${driver.givenName[0]}${driver.familyName[0]}</div>`;
+        } else {
+          imgWrap.innerHTML = `<div class="driver-placeholder-avatar">${driver.givenName[0]}${driver.familyName[0]}</div>`;
+        }
+        card.appendChild(imgWrap);
+
+        // Card Bottom
+        const cardBottom = document.createElement('div');
+        cardBottom.className = 'card-bottom';
+        cardBottom.innerHTML = `
+          <div>
+            <div class="driver-title-name">${driver.givenName} <span class="driver-title-surname">${driver.familyName}</span></div>
+            <div class="driver-nationality-text">${driver.nationality}</div>
+          </div>
+          <div class="driver-code-badge" style="background:${tColor}; color:${['haas', 'sauber', 'williams', 'mercedes'].includes(driver.team.toLowerCase()) ? '#000' : '#fff'}">${driver.code || 'DRV'}</div>
+        `;
+        card.appendChild(cardBottom);
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Filter Logic
+    function filterDrivers() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const team = document.getElementById('teamFilter').value.toLowerCase();
+
+      const filtered = driversData.filter(d => {
+        const matchesSearch = 
+          d.givenName.toLowerCase().includes(search) ||
+          d.familyName.toLowerCase().includes(search) ||
+          (d.code && d.code.toLowerCase().includes(search)) ||
+          d.nationality.toLowerCase().includes(search);
+        
+        const matchesTeam = team === '' || d.team.toLowerCase().includes(team);
+
+        return matchesSearch && matchesTeam;
+      });
+
+      renderDrivers(filtered);
+    }
+
+    // Show Detailed Profile Overlay Drawer
+    async function showProfile(driverId) {
+      let details;
+      try {
+        const response = await fetch(`${API_URL}/drivers/${driverId}`);
+        if (!response.ok) throw new Error('API server response failed');
+        details = await response.json();
+      } catch (err) {
+        // Fallback profile details
+        details = fallbackProfiles[driverId] || {
+          driverId: driverId,
+          givenName: 'Driver',
+          familyName: 'Details',
+          nationality: 'Unknown',
+          team: 'Independent',
+          placeOfBirth: 'Unknown',
+          height: 'N/A',
+          weight: 'N/A',
+          firstRace: 'N/A',
+          careerPodiums: 0,
+          careerWins: 0,
+          manager: 'N/A',
+          trainer: 'N/A',
+          languages: 'N/A',
+          helmetBrand: 'N/A',
+          imageUrl: 'https://media.formula1.com/content/dam/fom-website/drivers/default-driver.png'
+        };
+      }
+
+      const tColor = teamHexMap[details.team.toLowerCase()] || '#a0a0b0';
+      const tRGB = teamRGBMap[details.team.toLowerCase()] || '160, 160, 176';
+
+      // Setup Drawer Hero Details
+      const drawerHero = document.getElementById('drawerHero');
+      drawerHero.style.setProperty('--team-color', tColor);
+      drawerHero.style.setProperty('--team-color-alpha', `rgba(${tRGB}, 0.25)`);
+      
+      const avatarHTML = details.imageUrl ? 
+        `<img src="${details.imageUrl}" alt="${details.givenName} ${details.familyName}" onerror="this.src='https://media.formula1.com/content/dam/fom-website/drivers/default-driver.png'">` : 
+        `<div style="font-size:48px; color:rgba(255,255,255,0.2); text-align:center; padding-top:40px;">${details.givenName[0]}${details.familyName[0]}</div>`;
+
+      drawerHero.innerHTML = `
+        <div class="hero-img-wrap" style="border-color:${tColor}">
+          ${avatarHTML}
+        </div>
+        <div class="hero-text-wrap">
+          <div class="hero-number" style="color:${tColor}">#${details.permanentNumber || '00'} · ${details.code || 'DRV'}</div>
+          <div class="hero-name">${details.givenName} <span style="text-transform:uppercase">${details.familyName}</span></div>
+          <div class="hero-team">${details.team}</div>
+        </div>
+      `;
+
+      // Fill in Biographical Details
+      document.getElementById('profileDob').textContent = details.dateOfBirth || 'Unknown';
+      document.getElementById('profilePob').textContent = details.placeOfBirth || 'Unknown';
+      document.getElementById('profileNationality').textContent = details.nationality || 'Unknown';
+      document.getElementById('profileLanguages').textContent = details.languages || 'N/A';
+      document.getElementById('profileHeight').textContent = details.height || 'N/A';
+      document.getElementById('profileWeight').textContent = details.weight || 'N/A';
+
+      // Fill in Career Stats
+      document.getElementById('profileFirstRace').textContent = details.firstRace || 'N/A';
+      document.getElementById('profileWins').textContent = details.careerWins !== null ? details.careerWins : '0';
+      document.getElementById('profilePodiums').textContent = details.careerPodiums !== null ? details.careerPodiums : '0';
+      document.getElementById('profileHelmet').textContent = details.helmetBrand || 'N/A';
+
+      // Fill in Support Details
+      document.getElementById('profileManager').textContent = details.manager || 'N/A';
+      document.getElementById('profileTrainer').textContent = details.trainer || 'N/A';
+
+      // Wiki link
+      const wiki = document.getElementById('profileWiki');
+      wiki.dataset.url = details.url || 'https://www.formula1.com';
+
+      // Open Overlay Drawer
+      document.getElementById('profileOverlay').classList.add('active');
+    }
+
+    // Close Profile Overlay
+    function closeProfile() {
+      document.getElementById('profileOverlay').classList.remove('active');
+    }
+  </script>
+</body>
+
+</html>
