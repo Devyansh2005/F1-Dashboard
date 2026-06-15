@@ -356,7 +356,9 @@ async function seed() {
     'bearman': '/images/drivers/bearman.jpg',
     'piastri': '/images/drivers/piastri.jpg',
     'bottas': '/images/drivers/bottas.jpg',
-    'gasly': '/images/drivers/gasly.jpg'
+    'gasly': '/images/drivers/gasly.jpg',
+    'arvid_lindblad': '/images/drivers/lindblad.jpg',
+    'bortoleto': '/images/drivers/bortoleto.jpg'
   };
 
   // Create SQLite Database
@@ -408,7 +410,22 @@ async function seed() {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
+    const EXCLUDED_DRIVER_IDS = [
+      'paul_aron',
+      'dino_beganovic',
+      'luke_browning',
+      'leonardo_fornaroli',
+      'jak_crawford',
+      'colton_herta',
+      'ayumu_iwasa',
+      'frederik_vesti'
+    ];
+
     apiDrivers.forEach((d) => {
+      if (EXCLUDED_DRIVER_IDS.includes(d.driverId)) {
+        console.log(`Skipping excluded driver: ${d.driverId}`);
+        return;
+      }
       const rich = RICH_DRIVER_PROFILES[d.driverId] || {};
       // Priority: enriched profile team > standings API team > fallback
       const team = rich.team || teamMap[d.driverId] || 'Unknown Team';
