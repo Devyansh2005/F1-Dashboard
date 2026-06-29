@@ -1,5 +1,5 @@
 # Devyansh's Pit Wall · Your Personal F1 2026 Dashboard 🏎️🏁//BACKEND INACTIVE//
-austrian gp needs to be fixated
+
 🚀 **[View Live Demo](https://f1-dashboard-sepia.vercel.app/)**
 Welcome to the **Pit Wall** — a fast, premium, and broadcaster-quality personal Formula 1 dashboard. 
 
