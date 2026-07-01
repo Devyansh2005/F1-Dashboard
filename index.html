@@ -965,9 +965,29 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: 1.1fr 1fr 1fr;
+      grid-template-columns: 1.1fr 0.8fr 1fr 1fr;
       border: 2px solid var(--ink);
       background: var(--paper);
+    }
+
+    .col-image {
+      border-right: 1px solid var(--rule-light);
+      overflow: hidden;
+      position: relative;
+      min-height: 500px;
+    }
+
+    .col-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .col-image:hover img {
+      transform: scale(1.03);
     }
 
     .col {
@@ -1605,6 +1625,13 @@
 
       .main-grid {
         grid-template-columns: 1fr;
+      }
+
+      .col-image {
+        border-right: none;
+        border-bottom: 1px solid var(--rule-light);
+        min-height: 300px;
+        max-height: 400px;
       }
 
       .col {
@@ -2563,6 +2590,9 @@
           </div>
         </div>
       </div>
+
+      <div class="col-image">
+        <img src="/images/f1_driver_cards.jpg" alt="F1 2026 Driver Cards" loading="lazy">
       </div>
 
       <div class="col">
